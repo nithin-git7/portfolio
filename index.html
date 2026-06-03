@@ -90,8 +90,10 @@
             background: rgba(var(--primary-rgb), 0.3);
             border-radius: 4px;
         }
-        ::-webkit-scrollbar-thumb:hover {
+@media (hover: hover) {
+    ::-webkit-scrollbar-thumb:hover {
             background: var(--primary);
+        }
         }
 
         /* Abstract Grid & Glowing Orbs Background */
@@ -283,9 +285,11 @@
             position: relative;
         }
 
-        .nav-item a:hover {
+@media (hover: hover) {
+    .nav-item a:hover {
             color: var(--text-main);
             background: rgba(255, 255, 255, 0.03);
+        }
         }
 
         .nav-item a.active {
@@ -329,14 +333,18 @@
             z-index: 1;
         }
 
-        .glass-card:hover {
+@media (hover: hover) {
+    .glass-card:hover {
             border-color: rgba(var(--primary-rgb), 0.25);
             box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3), 0 0 25px rgba(var(--primary-rgb), 0.05);
             transform: translateY(-5px);
         }
+        }
 
-        .glass-card:hover::before {
+@media (hover: hover) {
+    .glass-card:hover::before {
             opacity: 1;
+        }
         }
 
         /* Hero Section Styling */
@@ -458,10 +466,12 @@
             box-shadow: 0 10px 25px rgba(var(--primary-rgb), 0.25);
         }
 
-        .btn-primary:hover {
+@media (hover: hover) {
+    .btn-primary:hover {
             background: var(--primary-hover);
             transform: translateY(-2px);
             box-shadow: 0 15px 30px rgba(var(--primary-rgb), 0.4);
+        }
         }
 
         .btn-secondary {
@@ -471,10 +481,12 @@
             backdrop-filter: blur(10px);
         }
 
-        .btn-secondary:hover {
+@media (hover: hover) {
+    .btn-secondary:hover {
             background: rgba(255, 255, 255, 0.08);
             border-color: rgba(255, 255, 255, 0.15);
             transform: translateY(-2px);
+        }
         }
 
         /* Photo Frame - Cyberpunk Cyber-frame */
@@ -495,9 +507,11 @@
             transition: var(--transition-smooth);
         }
 
-        .profile-frame:hover {
+@media (hover: hover) {
+    .profile-frame:hover {
             transform: scale(1.03) rotate(1deg);
             box-shadow: 0 30px 60px rgba(var(--primary-rgb), 0.25);
+        }
         }
 
         .profile-image-wrapper {
@@ -516,8 +530,10 @@
             transition: transform 0.5s ease;
         }
 
-        .profile-frame:hover img {
+@media (hover: hover) {
+    .profile-frame:hover img {
             transform: scale(1.05);
+        }
         }
 
         /* Photo scanning effect */
@@ -616,9 +632,11 @@
             transition: var(--transition-smooth);
         }
 
-        .highlight-item:hover {
+@media (hover: hover) {
+    .highlight-item:hover {
             border-color: rgba(var(--primary-rgb), 0.15);
             background: rgba(var(--primary-rgb), 0.02);
+        }
         }
 
         .highlight-num {
@@ -662,10 +680,12 @@
             transition: var(--transition-smooth);
         }
 
-        .filter-btn:hover {
+@media (hover: hover) {
+    .filter-btn:hover {
             color: var(--text-main);
             border-color: rgba(255, 255, 255, 0.15);
             background: rgba(255, 255, 255, 0.05);
+        }
         }
 
         .filter-btn.active {
@@ -695,10 +715,12 @@
             overflow: hidden;
         }
 
-        .skill-item:hover {
+@media (hover: hover) {
+    .skill-item:hover {
             border-color: rgba(var(--primary-rgb), 0.2);
             transform: translateY(-3px);
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
         }
 
         .skill-item-header {
@@ -801,10 +823,12 @@
             left: -8px;
         }
 
-        .timeline-item:hover .timeline-node {
+@media (hover: hover) {
+    .timeline-item:hover .timeline-node {
             background: var(--primary);
             box-shadow: 0 0 18px var(--primary);
             transform: scale(1.3);
+        }
         }
 
         .timeline-content {
@@ -817,9 +841,11 @@
             transition: var(--transition-smooth);
         }
 
-        .timeline-item:hover .timeline-content {
+@media (hover: hover) {
+    .timeline-item:hover .timeline-content {
             border-color: rgba(var(--primary-rgb), 0.2);
             box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+        }
         }
 
         .timeline-date {
@@ -909,14 +935,18 @@
             transition: var(--transition-smooth);
         }
 
-        .project-card:hover {
+@media (hover: hover) {
+    .project-card:hover {
             transform: translateY(-8px);
             border-color: rgba(var(--primary-rgb), 0.25);
             box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4), 0 0 30px rgba(var(--primary-rgb), 0.04);
         }
+        }
 
-        .project-card:hover::after {
+@media (hover: hover) {
+    .project-card:hover::after {
             opacity: 1;
+        }
         }
 
         .project-header {
@@ -940,11 +970,13 @@
             transition: var(--transition-smooth);
         }
 
-        .project-card:hover .project-icon-box {
+@media (hover: hover) {
+    .project-card:hover .project-icon-box {
             background: rgba(var(--primary-rgb), 0.08);
             border-color: rgba(var(--primary-rgb), 0.2);
             color: var(--primary);
             box-shadow: 0 0 15px rgba(var(--primary-rgb), 0.15);
+        }
         }
 
         .project-links {
@@ -959,10 +991,12 @@
             text-decoration: none;
         }
 
-        .project-links a:hover {
+@media (hover: hover) {
+    .project-links a:hover {
             color: var(--primary);
             transform: scale(1.15);
             text-shadow: 0 0 8px rgba(var(--primary-rgb), 0.5);
+        }
         }
 
         .project-body {
@@ -1006,10 +1040,12 @@
             transition: var(--transition-smooth);
         }
 
-        .project-card:hover .project-tech-tag {
+@media (hover: hover) {
+    .project-card:hover .project-tech-tag {
             border-color: rgba(255, 255, 255, 0.08);
             background: rgba(255, 255, 255, 0.04);
             color: var(--text-main);
+        }
         }
 
         .project-toggle-details {
@@ -1025,9 +1061,11 @@
             transition: var(--transition-smooth);
         }
 
-        .project-toggle-details:hover {
+@media (hover: hover) {
+    .project-toggle-details:hover {
             color: var(--primary-hover);
             text-shadow: 0 0 10px rgba(var(--primary-rgb), 0.3);
+        }
         }
 
         .project-details-content {
@@ -1096,10 +1134,12 @@
             gap: 10px;
         }
 
-        .resume-tab-btn:hover {
+@media (hover: hover) {
+    .resume-tab-btn:hover {
             color: var(--text-main);
             background: rgba(255, 255, 255, 0.04);
             border-color: rgba(255, 255, 255, 0.12);
+        }
         }
 
         .resume-tab-btn.active {
@@ -1193,8 +1233,10 @@
             transition: var(--transition-smooth);
         }
 
-        .resume-sheet-contact a:hover {
+@media (hover: hover) {
+    .resume-sheet-contact a:hover {
             color: var(--primary);
+        }
         }
 
         .resume-sheet-grid {
@@ -1314,10 +1356,12 @@
             position: relative;
         }
 
-        .achievement-card:hover {
+@media (hover: hover) {
+    .achievement-card:hover {
             border-color: rgba(var(--primary-rgb), 0.2);
             transform: translateY(-4px);
             box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+        }
         }
 
         .achievement-icon-box {
@@ -1398,10 +1442,12 @@
             transition: var(--transition-smooth);
         }
 
-        .contact-card:hover {
+@media (hover: hover) {
+    .contact-card:hover {
             border-color: rgba(var(--primary-rgb), 0.25);
             background: rgba(var(--primary-rgb), 0.02);
             transform: translateX(5px);
+        }
         }
 
         .contact-card-icon {
@@ -1418,10 +1464,12 @@
             transition: var(--transition-smooth);
         }
 
-        .contact-card:hover .contact-card-icon {
+@media (hover: hover) {
+    .contact-card:hover .contact-card-icon {
             background: rgba(var(--primary-rgb), 0.08);
             border-color: rgba(var(--primary-rgb), 0.2);
             box-shadow: 0 0 12px rgba(var(--primary-rgb), 0.15);
+        }
         }
 
         .contact-card-text h4 {
@@ -1461,12 +1509,14 @@
             transition: var(--transition-smooth);
         }
 
-        .social-circle-btn:hover {
+@media (hover: hover) {
+    .social-circle-btn:hover {
             color: var(--primary);
             border-color: rgba(var(--primary-rgb), 0.3);
             background: rgba(var(--primary-rgb), 0.06);
             transform: translateY(-3px);
             box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+        }
         }
 
         /* Futuristic Form Styling */
@@ -1576,8 +1626,10 @@
             transition: var(--transition-smooth);
         }
 
-        .footer-links a:hover {
+@media (hover: hover) {
+    .footer-links a:hover {
             color: var(--primary);
+        }
         }
 
         .footer-text {
@@ -1613,11 +1665,13 @@
             visibility: visible;
         }
 
-        .back-to-top:hover {
+@media (hover: hover) {
+    .back-to-top:hover {
             color: var(--primary);
             border-color: rgba(var(--primary-rgb), 0.3);
             transform: translateY(-5px);
             box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+        }
         }
 
         /* Reveal on scroll animations */
@@ -1765,6 +1819,8 @@
                 opacity: 1;
                 transform: translateY(0);
                 pointer-events: auto;
+                max-height: 80vh;
+                overflow-y: auto;
             }
 
             .nav-item a {
@@ -1787,6 +1843,10 @@
 
             .digital-resume-sheet {
                 padding: 30px 20px;
+            }
+
+            .form-input, .playground-input {
+                font-size: 16px !important;
             }
         }
 
@@ -1814,10 +1874,12 @@
             transition: var(--transition-smooth);
         }
 
-        .btn-playground-toggle:hover {
+@media (hover: hover) {
+    .btn-playground-toggle:hover {
             background: rgba(var(--primary-rgb), 0.12);
             border-color: var(--primary);
             box-shadow: 0 0 15px rgba(var(--primary-rgb), 0.1);
+        }
         }
 
         .playground-panel {
@@ -1911,9 +1973,11 @@
             width: 100%;
         }
 
-        .playground-btn:hover {
+@media (hover: hover) {
+    .playground-btn:hover {
             background: var(--primary-hover);
             box-shadow: 0 5px 15px rgba(var(--primary-rgb), 0.2);
+        }
         }
 
         .playground-console {
@@ -2137,8 +2201,10 @@
             outline: none;
         }
 
-        .theme-btn:hover {
+@media (hover: hover) {
+    .theme-btn:hover {
             transform: scale(1.2);
+        }
         }
 
         .theme-btn.active {
@@ -3348,39 +3414,46 @@
             // 3. Floating Navbar Scroll Adjustments & Back To Top visibility
             const navbar = document.getElementById('navbar');
             const backToTop = document.getElementById('backToTop');
+            const sections = document.querySelectorAll('section');
+            const navLinks = document.querySelectorAll('.nav-menu li a');
             
-            window.addEventListener('scroll', () => {
-                if (window.scrollY > 50) {
-                    navbar.classList.add('scrolled');
-                } else {
-                    navbar.classList.remove('scrolled');
-                }
+            // Intersection Observer for Sections (Active Nav Links)
+            const sectionObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const currentId = entry.target.getAttribute('id');
+                        navLinks.forEach(link => {
+                            link.classList.remove('active');
+                            if (link.getAttribute('href') === `#${currentId}`) {
+                                link.classList.add('active');
+                            }
+                        });
+                    }
+                });
+            }, { threshold: 0.2, rootMargin: "-100px 0px -100px 0px" });
+            sections.forEach(sec => sectionObserver.observe(sec));
 
-                if (window.scrollY > 500) {
-                    backToTop.classList.add('show');
-                } else {
-                    backToTop.classList.remove('show');
+            // Hardware-accelerated Scroll for Navbar/BackToTop
+            let isScrolling = false;
+            window.addEventListener('scroll', () => {
+                if (!isScrolling) {
+                    window.requestAnimationFrame(() => {
+                        if (window.scrollY > 50) {
+                            navbar.classList.add('scrolled');
+                        } else {
+                            navbar.classList.remove('scrolled');
+                        }
+
+                        if (window.scrollY > 500) {
+                            backToTop.classList.add('show');
+                        } else {
+                            backToTop.classList.remove('show');
+                        }
+                        isScrolling = false;
+                    });
+                    isScrolling = true;
                 }
-                
-                // Track Active Section in Scroll
-                const sections = document.querySelectorAll('section');
-                const navLinks = document.querySelectorAll('.nav-menu li a');
-                
-                let currentSectionId = '';
-                sections.forEach(sec => {
-                    const secTop = sec.offsetTop - 150;
-                    if (window.scrollY >= secTop) {
-                        currentSectionId = sec.getAttribute('id');
-                    }
-                });
-                
-                navLinks.forEach(link => {
-                    link.classList.remove('active');
-                    if (link.getAttribute('href') === `#${currentSectionId}`) {
-                        link.classList.add('active');
-                    }
-                });
-            });
+            }, { passive: true });
 
             // 4. Mobile Menu Toggle
             const mobileToggle = document.getElementById('mobileToggle');
@@ -3428,31 +3501,30 @@
                 });
             });
 
-            // Trigger progress bar widths on scroll
-            const animateSkills = () => {
-                const skillsSection = document.getElementById('skills');
-                const rect = skillsSection.getBoundingClientRect();
-                if (rect.top <= window.innerHeight - 100) {
-                    document.querySelectorAll('.skill-progress-bar').forEach(bar => {
+            // Trigger progress bar widths using Intersection Observer
+            const skillBars = document.querySelectorAll('.skill-progress-bar');
+            const skillsObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const bar = entry.target;
                         bar.style.width = bar.getAttribute('data-width');
-                    });
-                }
-            };
-            window.addEventListener('scroll', animateSkills);
-            animateSkills(); // Initial check
-
-            // 6. Reveal Elements on Scroll
-            const revealElements = () => {
-                const reveals = document.querySelectorAll('.reveal-on-scroll');
-                reveals.forEach(el => {
-                    const top = el.getBoundingClientRect().top;
-                    if (top < window.innerHeight - 100) {
-                        el.classList.add('active');
+                        skillsObserver.unobserve(bar);
                     }
                 });
-            };
-            window.addEventListener('scroll', revealElements);
-            revealElements(); // Initial run
+            }, { threshold: 0.1 });
+            skillBars.forEach(bar => skillsObserver.observe(bar));
+
+            // 6. Reveal Elements on Scroll
+            const reveals = document.querySelectorAll('.reveal-on-scroll');
+            const revealObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('active');
+                        revealObserver.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.1, rootMargin: "0px 0px -50px 0px" });
+            reveals.forEach(el => revealObserver.observe(el));
         });
 
         // 7. Toggle Project Details Drawer
@@ -3865,24 +3937,34 @@
             let width = canvas.width = window.innerWidth;
             let height = canvas.height = window.innerHeight;
             
-            const particles = [];
-            const maxParticles = 65;
-            const connectionDist = 115;
+            let particles = [];
+            let maxParticles = width < 768 ? 25 : 65;
+            let connectionDist = width < 768 ? 85 : 115;
             
             const mouse = { x: null, y: null };
             document.addEventListener('mousemove', (e) => {
                 mouse.x = e.clientX;
                 mouse.y = e.clientY;
-            });
+            }, { passive: true });
             document.addEventListener('mouseleave', () => {
                 mouse.x = null;
                 mouse.y = null;
             });
             
+            let resizeTimeout;
             window.addEventListener('resize', () => {
-                width = canvas.width = window.innerWidth;
-                height = canvas.height = window.innerHeight;
-            });
+                if (resizeTimeout) clearTimeout(resizeTimeout);
+                resizeTimeout = setTimeout(() => {
+                    width = canvas.width = window.innerWidth;
+                    height = canvas.height = window.innerHeight;
+                    const newMax = width < 768 ? 25 : 65;
+                    connectionDist = width < 768 ? 85 : 115;
+                    if (newMax !== maxParticles) {
+                        maxParticles = newMax;
+                        initParticles();
+                    }
+                }, 200);
+            }, { passive: true });
             
             class Particle {
                 constructor() {
@@ -3910,10 +3992,13 @@
                 }
             }
             
-            for (let i = 0; i < maxParticles; i++) {
-                particles.push(new Particle());
+            function initParticles() {
+                particles = [];
+                for (let i = 0; i < maxParticles; i++) {
+                    particles.push(new Particle());
+                }
             }
-            
+            initParticles();
             function animateParticles() {
                 ctx.clearRect(0, 0, width, height);
                 const primaryColor = getComputedStyle(document.documentElement).getPropertyValue('--primary').trim();
