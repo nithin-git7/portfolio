@@ -1,10 +1,22 @@
 
 // --- ELITE PRELOADER ---
-document.body.style.overflow = 'hidden';
-let counterElement = document.querySelector('.counter');
-let preloaderObj = { value: 0 };
+const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const gsapApi = window.gsap;
+const scrollTriggerApi = window.ScrollTrigger;
+const lenisConstructor = window.Lenis;
+const preloader = document.querySelector('.elite-preloader');
+const counterElement = document.querySelector('.counter');
+const preloaderObj = { value: 0 };
 
-gsap.to(preloaderObj, {
+function releasePreloader() {
+    preloader?.remove();
+    document.body.style.overflow = '';
+}
+
+if (prefersReducedMotion || !gsapApi || !preloader) {
+    releasePreloader();
+} else {
+    gsapApi.to(preloaderObj, {
     value: 100,
     duration: 2.5,
     ease: "power2.inOut",
@@ -12,24 +24,24 @@ gsap.to(preloaderObj, {
         counterElement.innerText = Math.round(preloaderObj.value) + '%';
     },
     onComplete: () => {
-        gsap.to('.elite-preloader', {
+        gsapApi.to('.elite-preloader', {
             clipPath: 'polygon(0% 0%, 100% 0%, 100% 0%, 0% 0%)',
             duration: 1.2,
             ease: "expo.inOut",
             onComplete: () => {
-                document.querySelector('.elite-preloader').remove();
-                document.body.style.overflow = '';
+                releasePreloader();
                 // Restart Hero Animations here
-                if(window.heroNameSplitChars) {
-                    gsap.fromTo(window.heroNameSplitChars, 
-                        { opacity: 0, y: 100, rotateZ: () => Math.random() * 30 - 15 },
-                        { opacity: 1, y: 0, rotateZ: 0, stagger: 0.03, duration: 1, ease: "power4.out" }
+                if(window.heroNameElement) {
+                    gsapApi.fromTo(window.heroNameElement,
+                        { opacity: 0, y: 24 },
+                        { opacity: 1, y: 0, duration: 0.8, ease: "power4.out" }
                     );
                 }
             }
         });
     }
-});
+    });
+}
 
 
 // Cache primary color
@@ -47,20 +59,28 @@ if (typeof originalSetTheme === 'function') {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+            // Keep the source markup readable while presenting the founder-led order visually.
+            const mainContent = document.getElementById('main-content');
+            const initialHashId = window.location.hash ? window.location.hash.slice(1) : '';
+            const sectionOrder = ['home', 'projects', 'about', 'skills', 'timeline', 'prompts', 'resume', 'achievements', 'contact'];
+            if (mainContent) {
+                sectionOrder.forEach((sectionId) => {
+                    const section = document.getElementById(sectionId);
+                    if (section && section.parentElement === mainContent) mainContent.appendChild(section);
+                });
+                if (initialHashId) {
+                    requestAnimationFrame(() => {
+                        document.getElementById(initialHashId)?.scrollIntoView({ behavior: 'auto', block: 'start' });
+                    });
+                }
+            }
             
-            // 1. Ambient Glow Tracking Mouse
-            const mouseGlow = document.getElementById('mouseGlow');
-            document.addEventListener('mousemove', (e) => {
-                mouseGlow.style.left = e.clientX + 'px';
-                mouseGlow.style.top = e.clientY + 'px';
-            });
-
-            // 2. Typing animation for Hero Title
+            // 1. Typing animation for Hero Title
             const titles = [
-                "Machine Learning Intern",
-                "Computer Science Undergraduate",
-                "Artificial Intelligence Specialization",
-                "Deep Learning Enthusiast"
+                "AI Product Builder",
+                "Machine Learning Engineer",
+                "Builder of Agent Tools",
+                "Computer Science Undergraduate"
             ];
             let titleIndex = 0;
             let charIndex = 0;
@@ -94,9 +114,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 if (!document.hidden) { setTimeout(typeText, typingSpeed); } else { document.addEventListener("visibilitychange", function resumeTyping() { if(!document.hidden) { document.removeEventListener("visibilitychange", resumeTyping); setTimeout(typeText, typingSpeed); } }); }
             }
-            typeText();
+            if (prefersReducedMotion) {
+                heroTitleEl.textContent = titles[0];
+            } else {
+                typeText();
+            }
 
-            // 3. Floating Navbar Scroll Adjustments & Back To Top visibility
+            // 2. Floating Navbar Scroll Adjustments & Back To Top visibility
             const navbar = document.getElementById('navbar');
             const backToTop = document.getElementById('backToTop');
             const sections = document.querySelectorAll('section');
@@ -107,10 +131,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 entries.forEach(entry => {
                     if (entry.isIntersecting) {
                         const currentId = entry.target.getAttribute('id');
-                        navLinks.forEach(link => {
+                            navLinks.forEach(link => {
                             link.classList.remove('active');
+                            link.removeAttribute('aria-current');
                             if (link.getAttribute('href') === `#${currentId}`) {
                                 link.classList.add('active');
+                                link.setAttribute('aria-current', 'location');
                             }
                         });
                     }
@@ -118,36 +144,45 @@ document.addEventListener('DOMContentLoaded', () => {
             }, { threshold: 0.2, rootMargin: "-100px 0px -100px 0px" });
             sections.forEach(sec => sectionObserver.observe(sec));
 
-            // Hardware-accelerated Scroll for Navbar/BackToTop
-            let isScrolling = false;
-            window.addEventListener('scroll', () => {
-                if (!isScrolling) {
-                    window.requestAnimationFrame(() => {
-                        if (window.scrollY > 50) {
-                            navbar.classList.add('scrolled');
-                        } else {
-                            navbar.classList.remove('scrolled');
-                        }
+            // Scroll state uses observers instead of a per-frame scroll listener.
+            const createScrollMarker = (top) => {
+                const marker = document.createElement('div');
+                marker.setAttribute('aria-hidden', 'true');
+                marker.style.cssText = `position: absolute; top: ${top}px; left: 0; width: 1px; height: 1px; pointer-events: none; opacity: 0;`;
+                document.body.appendChild(marker);
+                return marker;
+            };
 
-                        if (window.scrollY > 500) {
-                            backToTop.classList.add('show');
-                        } else {
-                            backToTop.classList.remove('show');
-                        }
-                        isScrolling = false;
-                    });
-                    isScrolling = true;
-                }
-            }, { passive: true });
+            const navMarker = createScrollMarker(50);
+            const backToTopMarker = createScrollMarker(500);
+            const navStateObserver = new IntersectionObserver(([entry]) => {
+                navbar.classList.toggle('scrolled', !entry.isIntersecting);
+            });
+            const backToTopObserver = new IntersectionObserver(([entry]) => {
+                backToTop.classList.toggle('show', !entry.isIntersecting);
+            });
+            navStateObserver.observe(navMarker);
+            backToTopObserver.observe(backToTopMarker);
 
-            // 4. Mobile Menu Toggle
+            // 3. Mobile Menu Toggle
             const mobileToggle = document.getElementById('mobileToggle');
             const navMenu = document.getElementById('navMenu');
+
+            const syncMobileNavState = () => {
+                const isMobile = window.matchMedia('(max-width: 900px)').matches;
+                const isOpen = navMenu.classList.contains('active');
+                navMenu.inert = isMobile && !isOpen;
+                navMenu.setAttribute('aria-hidden', String(isMobile && !isOpen));
+            };
+            syncMobileNavState();
+            window.addEventListener('resize', syncMobileNavState, { passive: true });
             
             mobileToggle.addEventListener('click', () => {
-                navMenu.classList.toggle('active');
+                const isOpen = navMenu.classList.toggle('active');
+                mobileToggle.setAttribute('aria-expanded', String(isOpen));
+                syncMobileNavState();
                 const icon = mobileToggle.querySelector('i');
-                if (navMenu.classList.contains('active')) {
+                if (isOpen) {
                     icon.className = 'fa-solid fa-xmark';
                 } else {
                     icon.className = 'fa-solid fa-bars-staggered';
@@ -158,18 +193,24 @@ document.addEventListener('DOMContentLoaded', () => {
             document.querySelectorAll('.nav-item a').forEach(link => {
                 link.addEventListener('click', () => {
                     navMenu.classList.remove('active');
+                    mobileToggle.setAttribute('aria-expanded', 'false');
+                    syncMobileNavState();
                     mobileToggle.querySelector('i').className = 'fa-solid fa-bars-staggered';
                 });
             });
 
-            // 5. Skills Grid Filter & Bar Animation trigger
+            // 4. Skills Grid Filter & Bar Animation trigger
             const filterBtns = document.querySelectorAll('.filter-btn');
             const skillItems = document.querySelectorAll('.skill-item');
             
             filterBtns.forEach(btn => {
                 btn.addEventListener('click', () => {
-                    filterBtns.forEach(b => b.classList.remove('active'));
+                    filterBtns.forEach(b => {
+                        b.classList.remove('active');
+                        b.setAttribute('aria-pressed', 'false');
+                    });
                     btn.classList.add('active');
+                    btn.setAttribute('aria-pressed', 'true');
                     
                     const filterValue = btn.getAttribute('data-filter');
                     
@@ -220,6 +261,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const label = btn.querySelector('span');
             
             detailsContent.classList.toggle('expanded');
+            const isExpanded = detailsContent.classList.contains('expanded');
+            btn.setAttribute('aria-expanded', String(isExpanded));
+            detailsContent.setAttribute('aria-hidden', String(!isExpanded));
             
             if (detailsContent.classList.contains('expanded')) {
                 icon.className = 'fa-solid fa-chevron-up';
@@ -249,15 +293,24 @@ document.addEventListener('DOMContentLoaded', () => {
                 tabInteractive.classList.add('active');
                 tabPdf.classList.remove('active');
             }
+
+            [btnInteractive, btnPdf].forEach(btn => {
+                btn.setAttribute('aria-pressed', String(btn.classList.contains('active')));
+            });
+            [tabInteractive, tabPdf].forEach(panel => {
+                panel.setAttribute('aria-hidden', String(!panel.classList.contains('active')));
+            });
         }
 
         // 9. Scroll to Top function
         function scrollToTop() {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            window.scrollTo({ top: 0, behavior: prefersReducedMotion ? 'auto' : 'smooth' });
         }
 
         // 10. Contact Form Submission Upgraded Handler
-        let lastMailtoData = null;
+        const contactModal = document.getElementById('contactModal');
+        const contactCloseButton = contactModal?.querySelector('button');
+        let contactReturnFocus = null;
 
         function handleFormSubmit(e) {
             e.preventDefault();
@@ -268,53 +321,82 @@ document.addEventListener('DOMContentLoaded', () => {
             
             const submitBtn = e.target.querySelector('button[type="submit"]');
             submitBtn.disabled = true;
-            submitBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Encrypting Message...';
-            
-            // Simulate secure backend transfer
-            setTimeout(() => {
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = 'Send Message <i class="fa-regular fa-paper-plane"></i>';
-                
-                const transactionId = `ML-${Math.floor(Math.random() * 90000 + 10000)}`;
-                
-                // Store mailto info for fallback
-                lastMailtoData = { name, email, subject, message };
-                
-                const detailsEl = document.getElementById('contactModalDetails');
-                detailsEl.innerHTML = `
-                    <strong>Sender Name:</strong> ${name}<br>
-                    <strong>Reply-to Contact:</strong> ${email}<br>
-                    <strong>Security Status:</strong> SSL Encrypted (256-bit)<br>
-                    <strong>Secure Transaction ID:</strong> ${transactionId}<br>
-                    <strong>Status Code:</strong> 200 OK / SUCCESS
-                `;
-                
-                // Setup fallback mailto action
-                document.getElementById('fallbackMailtoBtn').onclick = () => {
-                    const mailtoUrl = `mailto:nithinpolavarapu@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent("Name: " + name + "\nEmail: " + email + "\n\nMessage:\n" + message)}`;
-                    window.location.href = mailtoUrl;
-                };
+            submitBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Preparing Message...';
 
-                // Setup copy payload action
-                document.getElementById('copyPayloadBtn').onclick = () => {
-                    const payload = `INQUIRY DETAILS:\nName: ${name}\nEmail: ${email}\nSubject: ${subject}\nMessage: ${message}\n[Transaction logged under ID: ${transactionId}]`;
-                    navigator.clipboard.writeText(payload)
-                        .then(() => showToast("Message copied to clipboard!"))
-                        .catch(() => showToast("Failed to copy message."));
-                };
+            // This is a static site, so prepare an email draft instead of claiming a backend send.
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = 'Prepare Email <i class="fa-regular fa-paper-plane"></i>';
 
-                // Open Success Modal
-                document.getElementById('contactModal').classList.add('active');
-                
-                e.target.reset();
+            const detailsEl = document.getElementById('contactModalDetails');
+            detailsEl.textContent = `Name: ${name}\nReply-to: ${email}\nSubject: ${subject}\n\nYour message is ready to send.`;
 
-            }, 1500);
+            // Setup email draft action
+            document.getElementById('fallbackMailtoBtn').onclick = () => {
+                const mailtoUrl = `mailto:nithinpolavarapu@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent("Name: " + name + "\nEmail: " + email + "\n\nMessage:\n" + message)}`;
+                window.location.href = mailtoUrl;
+            };
+
+            // Setup copy payload action
+            document.getElementById('copyPayloadBtn').onclick = () => {
+                const payload = `Name: ${name}\nEmail: ${email}\nSubject: ${subject}\nMessage: ${message}`;
+                if (!navigator.clipboard) {
+                    showToast("Clipboard access is unavailable here.");
+                    return;
+                }
+                navigator.clipboard.writeText(payload)
+                    .then(() => showToast("Message copied to clipboard!"))
+                    .catch(() => showToast("Failed to copy message."));
+            };
+
+            contactReturnFocus = document.activeElement;
+            contactModal.inert = false;
+            contactModal.classList.add('active');
+            contactCloseButton?.focus();
+            e.target.reset();
         }
 
         function closeContactModal() {
-            document.getElementById('contactModal').classList.remove('active');
-            showToast("Inquiry logged successfully!");
+            contactModal.classList.remove('active');
+            contactModal.inert = true;
+            contactReturnFocus?.focus();
+            showToast("Message prepared. Choose an email option to send it.");
         }
+
+        function getModalFocusableElements() {
+            return Array.from(contactModal.querySelectorAll('a[href], button:not([disabled]), input:not([disabled]), textarea:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])'))
+                .filter(element => !element.hasAttribute('hidden'));
+        }
+
+        document.addEventListener('keydown', (event) => {
+            if (!contactModal.classList.contains('active')) return;
+
+            if (event.key === 'Escape') {
+                closeContactModal();
+                return;
+            }
+
+            if (event.key === 'Tab') {
+                const focusableElements = getModalFocusableElements();
+                if (!focusableElements.length) {
+                    event.preventDefault();
+                    return;
+                }
+
+                const firstElement = focusableElements[0];
+                const lastElement = focusableElements[focusableElements.length - 1];
+
+                if (!contactModal.contains(document.activeElement)) {
+                    event.preventDefault();
+                    (event.shiftKey ? lastElement : firstElement).focus();
+                } else if (event.shiftKey && document.activeElement === firstElement) {
+                    event.preventDefault();
+                    lastElement.focus();
+                } else if (!event.shiftKey && document.activeElement === lastElement) {
+                    event.preventDefault();
+                    firstElement.focus();
+                }
+            }
+        });
 
         function showToast(msg) {
             const toast = document.getElementById('toastBox');
@@ -333,13 +415,16 @@ document.addEventListener('DOMContentLoaded', () => {
             const text = btn.querySelector('span');
             
             panel.classList.toggle('active');
-            if (panel.classList.contains('active')) {
+            const isOpen = panel.classList.contains('active');
+            btn.setAttribute('aria-expanded', String(isOpen));
+            panel.setAttribute('aria-hidden', String(!isOpen));
+            if (isOpen) {
                 icon.className = 'fa-solid fa-square-minus';
-                text.textContent = 'Close Demo';
-                panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                text.textContent = 'Close prototype';
+                panel.scrollIntoView({ behavior: prefersReducedMotion ? 'auto' : 'smooth', block: 'nearest' });
             } else {
                 icon.className = 'fa-solid fa-play';
-                text.textContent = 'Simulation';
+                text.textContent = 'Prototype demo';
             }
         }
 
@@ -354,22 +439,24 @@ document.addEventListener('DOMContentLoaded', () => {
             
             consoleEl.innerHTML = '';
             consoleEl.classList.add('active');
+            consoleEl.setAttribute('aria-busy', 'true');
             progContainer.style.display = 'block';
             progressBar.style.width = '0%';
             resultEl.classList.remove('active');
+            resultEl.setAttribute('aria-busy', 'true');
             btn.disabled = true;
             btn.style.opacity = '0.5';
 
             const selectedSource = select.options[select.selectedIndex].text;
             
             const logs = [
-                { text: `[INFO] Initializing enterprise connection...`, type: 'info', delay: 200 },
-                { text: `[INFO] Ingesting source: "${selectedSource}"`, type: 'info', delay: 600 },
-                { text: `[SUCCESS] Established secure read-only DB connection pipeline.`, type: 'success', delay: 1000 },
-                { text: `[INFO] Executing ETL preprocess modules (imputing Nulls, normalizing scales)...`, type: 'info', delay: 1500 },
-                { text: `[INFO] Feeding tabular dimensions to gradient boosted ensemble...`, type: 'info', delay: 2200 },
-                { text: `[SUCCESS] Feature weights evaluated. Target vector predicted.`, type: 'success', delay: 2800 },
-                { text: `[SUCCESS] Pipeline executed successfully in 2.89s.`, type: 'success', delay: 3000 }
+                { text: `[INFO] Initializing example data source...`, type: 'info', delay: 200 },
+                { text: `[INFO] Reading sample source: "${selectedSource}"`, type: 'info', delay: 600 },
+                { text: `[SUCCESS] Simulated read-only connection step complete.`, type: 'success', delay: 1000 },
+                { text: `[INFO] Running sample preprocessing modules...`, type: 'info', delay: 1500 },
+                { text: `[INFO] Preparing sample features for the prototype flow...`, type: 'info', delay: 2200 },
+                { text: `[SUCCESS] Prototype decision view prepared.`, type: 'success', delay: 2800 },
+                { text: `[SUCCESS] Example output is ready for review.`, type: 'success', delay: 3000 }
             ];
 
             logs.forEach(log => {
@@ -399,24 +486,26 @@ document.addEventListener('DOMContentLoaded', () => {
                 let metricsHTML = '';
                 if (select.value === 'sales') {
                     metricsHTML = `
-                        <div class="playground-metric"><span>RÂ² Regression Score:</span><strong>0.942</strong></div>
-                        <div class="playground-metric"><span>Predicted Sales Trend (Next Qtr):</span><strong>+12.4%</strong></div>
-                        <div class="playground-metric"><span>Anomalous Transaction Flags:</span><strong>0 detected</strong></div>
+                        <div class="playground-metric"><span>Model fit (sample):</span><strong>Strong</strong></div>
+                        <div class="playground-metric"><span>Trend direction:</span><strong>Positive</strong></div>
+                        <div class="playground-metric"><span>Outlier scan:</span><strong>Clear</strong></div>
                     `;
                 } else if (select.value === 'churn') {
                     metricsHTML = `
-                        <div class="playground-metric"><span>Customer Churn Risk Level:</span><strong style="color:var(--primary)">LOW (11.8%)</strong></div>
-                        <div class="playground-metric"><span>Classifier Accuracy:</span><strong>89.6%</strong></div>
-                        <div class="playground-metric"><span>Top Churn Vector:</span><strong>Support Response Latency</strong></div>
+                        <div class="playground-metric"><span>Risk signal (sample):</span><strong style="color:var(--primary)">Low</strong></div>
+                        <div class="playground-metric"><span>Classifier signal:</span><strong>Stable</strong></div>
+                        <div class="playground-metric"><span>Top signal:</span><strong>Support response latency</strong></div>
                     `;
                 } else {
                     metricsHTML = `
-                        <div class="playground-metric"><span>Inbound Campaign Click Prediction:</span><strong>+8.7% CTR</strong></div>
-                        <div class="playground-metric"><span>Ad spend optimization advice:</span><strong>Reallocate budget to Social channels</strong></div>
-                        <div class="playground-metric"><span>Confidence Interval:</span><strong>95%</strong></div>
+                        <div class="playground-metric"><span>Click signal (sample):</span><strong>Positive</strong></div>
+                        <div class="playground-metric"><span>Recommendation:</span><strong>Review social channels</strong></div>
+                        <div class="playground-metric"><span>Review cue:</span><strong>Positive</strong></div>
                     `;
                 }
                 metricsEl.innerHTML = metricsHTML;
+                consoleEl.setAttribute('aria-busy', 'false');
+                resultEl.setAttribute('aria-busy', 'false');
                 resultEl.classList.add('active');
             }, 3100);
         }
@@ -435,19 +524,21 @@ document.addEventListener('DOMContentLoaded', () => {
             
             consoleEl.innerHTML = '';
             consoleEl.classList.add('active');
+            consoleEl.setAttribute('aria-busy', 'true');
             progContainer.style.display = 'block';
             progressBar.style.width = '0%';
             resultEl.classList.remove('active');
+            resultEl.setAttribute('aria-busy', 'true');
             btn.disabled = true;
             btn.style.opacity = '0.5';
 
             const logs = [
-                { text: `[INFO] Diagnostic pipeline initialized...`, type: 'info', delay: 200 },
+                { text: `[INFO] Prototype classifier initialized...`, type: 'info', delay: 200 },
                 { text: `[INFO] Checking input vectors: [Age: ${age}, RestHR: ${hr}, BP: ${bp}]`, type: 'info', delay: 500 },
-                { text: `[INFO] Aligning features with training data structure...`, type: 'info', delay: 1000 },
-                { text: `[INFO] Feeding input vector to diagnostic classifiers (Random Forest & XGBoost)...`, type: 'info', delay: 1600 },
-                { text: `[SUCCESS] Output probabilities generated. Writing audit logs.`, type: 'success', delay: 2200 },
-                { text: `[SUCCESS] Audit transaction logged to MongoDB (Record #DX-${Math.floor(Math.random() * 900000 + 100000)}).`, type: 'success', delay: 2600 }
+                { text: `[INFO] Aligning sample inputs with the feature schema...`, type: 'info', delay: 1000 },
+                { text: `[INFO] Running the illustrative classifier flow...`, type: 'info', delay: 1600 },
+                { text: `[SUCCESS] Illustrative output generated. Preparing review state.`, type: 'success', delay: 2200 },
+                { text: `[SUCCESS] Prototype output prepared for review.`, type: 'success', delay: 2600 }
             ];
 
             logs.forEach(log => {
@@ -474,20 +565,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 btn.style.opacity = '1';
                 progContainer.style.display = 'none';
                 
-                let risk = 12.5;
-                if (bp > 140) risk += 25.5;
-                if (hr > 90) risk += 18.2;
-                if (age > 60) risk += 15.0;
-                
-                let status = risk > 50 ? "ELEVATED RISK" : "NORMAL / STABLE";
-                let statusColor = risk > 50 ? "var(--accent)" : "var(--primary)";
+                const reviewSignal = bp > 140 || hr > 90 || age > 60;
+                const status = reviewSignal ? "Review signal" : "No review signal";
                 
                 metricsEl.innerHTML = `
-                    <div class="playground-metric"><span>Disease Probability Vector:</span><strong style="color:${statusColor}">${risk.toFixed(1)}% (${status})</strong></div>
-                    <div class="playground-metric"><span>Classifier Confidence Level:</span><strong>96.4%</strong></div>
-                    <div class="playground-metric"><span>XGBoost Classification output:</span><strong>Class 0 (Negative)</strong></div>
-                    <div class="playground-metric"><span>MongoDB Audit State:</span><strong style="color:var(--primary)">COMMITTED</strong></div>
+                    <div class="playground-metric"><span>Prototype screen:</span><strong style="color:var(--primary)">${status}</strong></div>
+                    <div class="playground-metric"><span>Input handling:</span><strong>Preprocessed</strong></div>
+                    <div class="playground-metric"><span>Output type:</span><strong>Illustrative classification</strong></div>
+                    <div class="playground-metric"><span>Safety note:</span><strong style="color:var(--primary)">Not a diagnosis</strong></div>
                 `;
+                consoleEl.setAttribute('aria-busy', 'false');
+                resultEl.setAttribute('aria-busy', 'false');
                 resultEl.classList.add('active');
             }, 2750);
         }
@@ -504,16 +592,18 @@ document.addEventListener('DOMContentLoaded', () => {
             
             consoleEl.innerHTML = '';
             consoleEl.classList.add('active');
+            consoleEl.setAttribute('aria-busy', 'true');
             progContainer.style.display = 'block';
             progressBar.style.width = '0%';
             resultEl.classList.remove('active');
+            resultEl.setAttribute('aria-busy', 'true');
             btn.disabled = true;
             btn.style.opacity = '0.5';
 
             const logs = [
                 { text: `[INFO] Tokenizer initialized. Encoding prompt input...`, type: 'info', delay: 100 },
-                { text: `[INFO] Seed encoded to token array ID: [${Array.from({length: 4}, () => Math.floor(Math.random() * 8000)).join(', ')}]`, type: 'info', delay: 400 },
-                { text: `[INFO] PyTorch inference loaded. Allocating GPU memory tensors...`, type: 'info', delay: 800 },
+                { text: `[INFO] Seed prepared for prototype inference.`, type: 'info', delay: 400 },
+                { text: `[INFO] Loading the PyTorch inference graph...`, type: 'info', delay: 800 },
                 { text: `[INFO] Generating sequential tokens (Temperature: ${temp})...`, type: 'info', delay: 1300 }
             ];
 
@@ -564,13 +654,15 @@ document.addEventListener('DOMContentLoaded', () => {
                         
                         const p = document.createElement('p');
                         p.className = 'playground-console-line success';
-                        p.textContent = `[INFERENCE] Pred Token #${idx+1}: "${token.trim()}" (prob: ${(Math.random() * 0.2 + 0.78).toFixed(3)})`;
+                        p.textContent = `[INFERENCE] Predicted token #${idx+1}: "${token.trim()}"`;
                         consoleEl.appendChild(p);
                         consoleEl.scrollTop = consoleEl.scrollHeight;
 
                         if (idx === tokens.length - 1) {
                             btn.disabled = false;
                             btn.style.opacity = '1';
+                            consoleEl.setAttribute('aria-busy', 'false');
+                            resultEl.setAttribute('aria-busy', 'false');
                         }
                     }, delay);
                     delay += 180;
@@ -617,6 +709,11 @@ document.addEventListener('DOMContentLoaded', () => {
         // 13. Neural Network Particle Background Canvas
         (function() {
             const canvas = document.getElementById('neuralCanvas');
+            const saveData = navigator.connection?.saveData === true;
+            if (prefersReducedMotion || saveData) {
+                canvas.style.display = 'none';
+                return;
+            }
             const ctx = canvas.getContext('2d');
             
             let width = canvas.width = window.innerWidth;
@@ -733,156 +830,128 @@ document.addEventListener('DOMContentLoaded', () => {
 // --- NEW CREATIVE FEATURES & FIXES ---
 
 // Lenis Smooth Scrolling
-const lenis = new Lenis({
-    autoRaf: true,
-});
+// Keep one animation owner. Lenis is manually driven by GSAP when both are available.
+const lenis = !prefersReducedMotion && lenisConstructor && gsapApi && scrollTriggerApi
+    ? new lenisConstructor({ autoRaf: false })
+    : null;
 
-// Sync Lenis with GSAP ScrollTrigger
-lenis.on('scroll', ScrollTrigger.update);
-gsap.ticker.add((time) => lenis.raf(time * 1000));
-gsap.ticker.lagSmoothing(0);
-
-// Register GSAP Plugins
-gsap.registerPlugin(ScrollTrigger, SplitText);
-
-// 1. Cinematic Scroll Reveals (GSAP)
-document.querySelectorAll('.reveal-on-scroll').forEach(el => {
-    // We just remove the class since GSAP will handle it
-    el.classList.remove('reveal-on-scroll');
-});
-
-// Section Headers Stagger
-gsap.utils.toArray('.section-header').forEach(header => {
-    const title = header.querySelector('.section-title');
-    const subtitle = header.querySelector('.section-subtitle');
-    
-    if(title) {
-        const splitTitle = new SplitText(title, {type: "words,chars"});
-        gsap.from(splitTitle.chars, {
-            scrollTrigger: {
-                trigger: header,
-                start: "top 85%",
-                toggleActions: "play none none none"
-            },
-            opacity: 0,
-            y: 50,
-            rotateX: -90,
-            stagger: 0.05,
-            duration: 0.8,
-            ease: "back.out(1.7)"
-        });
-    }
-    
-    if(subtitle) {
-        gsap.from(subtitle, {
-            scrollTrigger: {
-                trigger: header,
-                start: "top 85%",
-            },
-            opacity: 0,
-            x: -50,
-            duration: 0.6,
-            delay: 0.2
-        });
-    }
-});
-
-// 2. Hero Name SplitText
-const heroName = document.querySelector('.hero-name');
-if(heroName) {
-    const splitHero = new SplitText(heroName, {type: "chars"});
-    window.heroNameSplitChars = splitHero.chars;
-    // Hero animation moved to preloader complete
+if (lenis) {
+    lenis.on('scroll', scrollTriggerApi.update);
+    gsapApi.ticker.add((time) => lenis.raf(time * 1000));
+    gsapApi.ticker.lagSmoothing(0);
 }
 
-// 3. Vanilla Tilt for Glass Cards
-if (window.VanillaTilt) {
-    VanillaTilt.init(document.querySelectorAll(".glass-card"), {
-        max: 10,
-        speed: 400,
-        glare: true,
-        "max-glare": 0.2,
-        perspective: 1000,
-        gyroscope: true
-    });
+const canRevealSections = Boolean(!prefersReducedMotion && gsapApi && scrollTriggerApi);
+
+if (gsapApi && scrollTriggerApi) {
+    gsapApi.registerPlugin(scrollTriggerApi);
 }
 
-// 4. Custom Cursor Follower
-const cursor = document.createElement('div');
-cursor.classList.add('custom-cursor');
-document.body.appendChild(cursor);
-
-let mouseX = 0, mouseY = 0, cursorX = 0, cursorY = 0;
-window.addEventListener('mousemove', (e) => {
-    mouseX = e.clientX;
-    mouseY = e.clientY;
-});
-
-// 5. Magnetic Buttons
-document.querySelectorAll('.btn, .social-circle-btn').forEach(btn => {
-    btn.addEventListener('mouseenter', () => cursor.classList.add('hover'));
-    btn.addEventListener('mouseleave', () => {
-        cursor.classList.remove('hover');
-        gsap.to(btn, {x: 0, y: 0, duration: 0.5, ease: "elastic.out(1, 0.3)"});
+if (canRevealSections) {
+    document.querySelectorAll('.reveal-on-scroll').forEach(el => {
+        el.classList.remove('reveal-on-scroll');
     });
-    
-    btn.addEventListener('mousemove', (e) => {
-        const rect = btn.getBoundingClientRect();
-        const x = e.clientX - rect.left - rect.width / 2;
-        const y = e.clientY - rect.top - rect.height / 2;
-        gsap.to(btn, {x: x * 0.3, y: y * 0.3, duration: 0.1});
-    });
-});
 
-// Elite Hover states for cursor
-document.querySelectorAll('a, .btn, .skill-item').forEach(el => {
-    el.addEventListener('mouseenter', () => cursor.classList.add('hover'));
-    el.addEventListener('mouseleave', () => cursor.classList.remove('hover'));
-});
+    gsapApi.utils.toArray('.section-header').forEach(header => {
+        const title = header.querySelector('.section-title');
+        const subtitle = header.querySelector('.section-subtitle');
 
-document.querySelectorAll('[data-cursor]').forEach(el => {
-    el.addEventListener('mouseenter', () => {
-        cursor.classList.add('text-mode');
-        cursor.innerText = el.getAttribute('data-cursor');
-    });
-    el.addEventListener('mouseleave', () => {
-        cursor.classList.remove('text-mode');
-        cursor.innerText = '';
-    });
-});
+        if(title) {
+            gsapApi.from(title, {
+                scrollTrigger: {
+                    trigger: header,
+                    start: "top 85%",
+                    toggleActions: "play none none none"
+                },
+                opacity: 0,
+                y: 50,
+                duration: 0.8,
+                ease: "power3.out"
+            });
+        }
 
-// Custom cursor loop
-function cursorLoop() {
-    cursorX += (mouseX - cursorX) * 0.15;
-    cursorY += (mouseY - cursorY) * 0.15;
-    cursor.style.transform = `translate(${cursorX}px, ${cursorY}px)`;
-    requestAnimationFrame(cursorLoop);
-}
-cursorLoop();
-
-// 6. Horizontal Scroll Project Gallery
-const gallery = document.querySelector('.projects-gallery');
-const wrapper = document.querySelector('.projects-gallery-wrapper');
-if (gallery && wrapper && window.innerWidth > 768) {
-    let scrollTween = gsap.to(gallery, {
-        x: () => -(gallery.scrollWidth - window.innerWidth + 100) + "px",
-        ease: "none",
-        scrollTrigger: {
-            trigger: wrapper,
-            pin: true,
-            scrub: 1,
-            start: "center center",
-            end: () => "+=" + gallery.scrollWidth
+        if(subtitle) {
+            gsapApi.from(subtitle, {
+                scrollTrigger: {
+                    trigger: header,
+                    start: "top 85%",
+                },
+                opacity: 0,
+                x: -50,
+                duration: 0.6,
+                delay: 0.2
+            });
         }
     });
+} else {
+    document.querySelectorAll('.reveal-on-scroll').forEach(el => {
+        el.classList.add('active');
+    });
 }
 
-// 7. Page Visibility API & Performance Fixes
-// Pause everything when tab is hidden
+// Hero name animation
+const heroName = document.querySelector('.hero-name');
+if(heroName) {
+    window.heroNameElement = heroName;
+}
+
+// Page Visibility API & Performance Fixes
 document.addEventListener("visibilitychange", () => {
+    if (!gsapApi) return;
     if (document.hidden) {
-        gsap.globalTimeline.pause();
+        gsapApi.globalTimeline.pause();
     } else {
-        gsap.globalTimeline.play();
+        gsapApi.globalTimeline.play();
+    }
+});
+
+// 8. Prompt Engineering Lab Logic
+document.addEventListener('DOMContentLoaded', () => {
+    const promptTabs = document.querySelectorAll('.prompt-tab');
+    const promptCodeDisplay = document.getElementById('promptCodeDisplay');
+    const copyPromptBtn = document.getElementById('copyPromptBtn');
+    const copyPromptText = document.getElementById('copyPromptText');
+
+    const promptsData = {
+        data: '"Act as a Senior Data Architect. I will provide you with unstructured JSON logs. Your task is to extract all nested features, handle missing data points by imputing the median where logical, and output a flattened, normalized CSV-compatible format suitable for XGBoost training. Provide only the resulting structure, no explanations."',
+        analyze: '"Analyze the following time-series dataset. Identify any seasonal anomalies, trend shifts, or cyclic patterns. Generate a Python script using pandas and statsmodels to visualize the decomposition of these components. Focus on robust detection of outliers over 3 standard deviations."',
+        optimize: '"You are an expert Machine Learning Engineer. Review the provided PyTorch neural network architecture. Optimize the model for inference latency without sacrificing more than 1% accuracy. Suggest quantization strategies, operator fusion techniques, and provide the updated forward pass code."'
+    };
+
+    if (promptTabs.length > 0) {
+        promptTabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                promptTabs.forEach(t => {
+                    t.classList.remove('active');
+                    t.setAttribute('aria-pressed', 'false');
+                });
+                tab.classList.add('active');
+                tab.setAttribute('aria-pressed', 'true');
+
+                const promptKey = tab.getAttribute('data-prompt');
+                promptCodeDisplay.style.animation = 'none';
+                promptCodeDisplay.offsetHeight; /* trigger reflow */
+                promptCodeDisplay.style.animation = null;
+                promptCodeDisplay.textContent = promptsData[promptKey];
+            });
+        });
+
+        copyPromptBtn.addEventListener('click', () => {
+            const textToCopy = promptCodeDisplay.textContent;
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                copyPromptBtn.classList.add('success');
+                if (copyPromptText) copyPromptText.textContent = 'Copied!';
+                const icon = copyPromptBtn.querySelector('i');
+                if (icon) icon.className = 'fa-solid fa-check';
+
+                setTimeout(() => {
+                    copyPromptBtn.classList.remove('success');
+                    if (copyPromptText) copyPromptText.textContent = 'Copy';
+                    if (icon) icon.className = 'fa-regular fa-copy';
+                }, 2000);
+            }).catch(err => {
+                console.error("Clipboard copy failed", err);
+            });
+        });
     }
 });
