@@ -1,61 +1,8 @@
 
-// --- ELITE PRELOADER ---
 const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-const gsapApi = window.gsap;
-const scrollTriggerApi = window.ScrollTrigger;
-const lenisConstructor = window.Lenis;
-const preloader = document.querySelector('.elite-preloader');
-const counterElement = document.querySelector('.counter');
-const preloaderObj = { value: 0 };
 
-function releasePreloader() {
-    preloader?.remove();
-    document.body.style.overflow = '';
-}
-
-if (prefersReducedMotion || !gsapApi || !preloader) {
-    releasePreloader();
-} else {
-    gsapApi.to(preloaderObj, {
-    value: 100,
-    duration: 2.5,
-    ease: "power2.inOut",
-    onUpdate: () => {
-        counterElement.innerText = Math.round(preloaderObj.value) + '%';
-    },
-    onComplete: () => {
-        gsapApi.to('.elite-preloader', {
-            clipPath: 'polygon(0% 0%, 100% 0%, 100% 0%, 0% 0%)',
-            duration: 1.2,
-            ease: "expo.inOut",
-            onComplete: () => {
-                releasePreloader();
-                // Restart Hero Animations here
-                if(window.heroNameElement) {
-                    gsapApi.fromTo(window.heroNameElement,
-                        { opacity: 0, y: 24 },
-                        { opacity: 1, y: 0, duration: 0.8, ease: "power4.out" }
-                    );
-                }
-            }
-        });
-    }
-    });
-}
-
-
-// Cache primary color
-let cachedPrimaryColor = getComputedStyle(document.documentElement).getPropertyValue('--primary-rgb').trim() || '255, 0, 85';
-
-// Update cache when theme changes
-const originalSetTheme = window.setTheme;
-if (typeof originalSetTheme === 'function') {
-    window.setTheme = function(theme) {
-        originalSetTheme(theme);
-        setTimeout(() => {
-            cachedPrimaryColor = getComputedStyle(document.documentElement).getPropertyValue('--primary-rgb').trim();
-        }, 50);
-    };
+function emitPortfolioMotion(type, detail = {}) {
+    document.dispatchEvent(new CustomEvent(`portfolio:${type}`, { detail }));
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -75,52 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
             
-            // 1. Typing animation for Hero Title
-            const titles = [
-                "AI Product Builder",
-                "Machine Learning Engineer",
-                "Builder of Agent Tools",
-                "Computer Science Undergraduate"
-            ];
-            let titleIndex = 0;
-            let charIndex = 0;
-            let currentText = "";
-            let isDeleting = false;
-            const heroTitleEl = document.getElementById('heroTitle');
-            
-            function typeText() {
-                const fullText = titles[titleIndex];
-                if (isDeleting) {
-                    currentText = fullText.substring(0, charIndex - 1);
-                    charIndex--;
-                } else {
-                    currentText = fullText.substring(0, charIndex + 1);
-                    charIndex++;
-                }
-                
-                heroTitleEl.innerHTML = currentText + '<span class="typed-cursor">|</span>';
-                
-                let typingSpeed = 100;
-                if (isDeleting) typingSpeed /= 2.5;
-                
-                if (!isDeleting && charIndex === fullText.length) {
-                    typingSpeed = 2000; // Hold full text
-                    isDeleting = true;
-                } else if (isDeleting && charIndex === 0) {
-                    isDeleting = false;
-                    titleIndex = (titleIndex + 1) % titles.length;
-                    typingSpeed = 500; // Delay before typing next
-                }
-                
-                if (!document.hidden) { setTimeout(typeText, typingSpeed); } else { document.addEventListener("visibilitychange", function resumeTyping() { if(!document.hidden) { document.removeEventListener("visibilitychange", resumeTyping); setTimeout(typeText, typingSpeed); } }); }
-            }
-            if (prefersReducedMotion) {
-                heroTitleEl.textContent = titles[0];
-            } else {
-                typeText();
-            }
-
-            // 2. Floating Navbar Scroll Adjustments & Back To Top visibility
+            // 1. Floating Navbar Scroll Adjustments & Back To Top visibility
             const navbar = document.getElementById('navbar');
             const backToTop = document.getElementById('backToTop');
             const sections = document.querySelectorAll('section');
@@ -181,6 +83,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const isOpen = navMenu.classList.toggle('active');
                 mobileToggle.setAttribute('aria-expanded', String(isOpen));
                 syncMobileNavState();
+                emitPortfolioMotion('mobile-nav', { menu: navMenu, isOpen });
                 const icon = mobileToggle.querySelector('i');
                 if (isOpen) {
                     icon.className = 'fa-solid fa-xmark';
@@ -240,17 +143,9 @@ document.addEventListener('DOMContentLoaded', () => {
             }, { threshold: 0.1 });
             skillBars.forEach(bar => skillsObserver.observe(bar));
 
-            // 6. Reveal Elements on Scroll
+            // 6. Keep content available without the optional Motion enhancement.
             const reveals = document.querySelectorAll('.reveal-on-scroll');
-            const revealObserver = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        entry.target.classList.add('active');
-                        revealObserver.unobserve(entry.target);
-                    }
-                });
-            }, { threshold: 0.1, rootMargin: "0px 0px -50px 0px" });
-            reveals.forEach(el => revealObserver.observe(el));
+            reveals.forEach(el => el.classList.add('active'));
         });
 
         // 7. Toggle Project Details Drawer
@@ -264,6 +159,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const isExpanded = detailsContent.classList.contains('expanded');
             btn.setAttribute('aria-expanded', String(isExpanded));
             detailsContent.setAttribute('aria-hidden', String(!isExpanded));
+            emitPortfolioMotion('details', { panel: detailsContent, isOpen: isExpanded });
             
             if (detailsContent.classList.contains('expanded')) {
                 icon.className = 'fa-solid fa-chevron-up';
@@ -299,6 +195,9 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             [tabInteractive, tabPdf].forEach(panel => {
                 panel.setAttribute('aria-hidden', String(!panel.classList.contains('active')));
+            });
+            emitPortfolioMotion('resume-tab', {
+                panel: tabName === 'pdf' ? tabPdf : tabInteractive
             });
         }
 
@@ -351,6 +250,10 @@ document.addEventListener('DOMContentLoaded', () => {
             contactReturnFocus = document.activeElement;
             contactModal.inert = false;
             contactModal.classList.add('active');
+            emitPortfolioMotion('modal-open', {
+                modal: contactModal,
+                card: contactModal.querySelector('.contact-modal-card')
+            });
             contactCloseButton?.focus();
             e.target.reset();
         }
@@ -418,6 +321,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const isOpen = panel.classList.contains('active');
             btn.setAttribute('aria-expanded', String(isOpen));
             panel.setAttribute('aria-hidden', String(!isOpen));
+            emitPortfolioMotion('playground', { panel, isOpen });
             if (isOpen) {
                 icon.className = 'fa-solid fa-square-minus';
                 text.textContent = 'Close prototype';
@@ -706,205 +610,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-        // 13. Neural Network Particle Background Canvas
-        (function() {
-            const canvas = document.getElementById('neuralCanvas');
-            const saveData = navigator.connection?.saveData === true;
-            if (prefersReducedMotion || saveData) {
-                canvas.style.display = 'none';
-                return;
-            }
-            const ctx = canvas.getContext('2d');
-            
-            let width = canvas.width = window.innerWidth;
-            let height = canvas.height = window.innerHeight;
-            
-            let particles = [];
-            let maxParticles = width < 768 ? 25 : 65;
-            let connectionDist = width < 768 ? 85 : 115;
-            
-            const mouse = { x: null, y: null };
-            document.addEventListener('mousemove', (e) => {
-                mouse.x = e.clientX;
-                mouse.y = e.clientY;
-            }, { passive: true });
-            document.addEventListener('mouseleave', () => {
-                mouse.x = null;
-                mouse.y = null;
-            });
-            
-            let resizeTimeout;
-            window.addEventListener('resize', () => {
-                if (resizeTimeout) clearTimeout(resizeTimeout);
-                resizeTimeout = setTimeout(() => {
-                    width = canvas.width = window.innerWidth;
-                    height = canvas.height = window.innerHeight;
-                    const newMax = width < 768 ? 25 : 65;
-                    connectionDist = width < 768 ? 85 : 115;
-                    if (newMax !== maxParticles) {
-                        maxParticles = newMax;
-                        initParticles();
-                    }
-                }, 200);
-            }, { passive: true });
-            
-            class Particle {
-                constructor() {
-                    this.x = Math.random() * width;
-                    this.y = Math.random() * height;
-                    this.vx = (Math.random() - 0.5) * 0.4;
-                    this.vy = (Math.random() - 0.5) * 0.4;
-                    this.r = Math.random() * 2 + 1;
-                }
-                
-                update() {
-                    this.x += this.vx;
-                    this.y += this.vy;
-                    
-                    if (this.x < 0 || this.x > width) this.vx *= -1;
-                    if (this.y < 0 || this.y > height) this.vy *= -1;
-                }
-                
-                draw() {
-                    ctx.beginPath();
-                    ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
-                    const primaryColor = `rgb(${cachedPrimaryColor})`.trim();
-                    ctx.fillStyle = primaryColor + '50';
-                    ctx.fill();
-                }
-            }
-            
-            function initParticles() {
-                particles = [];
-                for (let i = 0; i < maxParticles; i++) {
-                    particles.push(new Particle());
-                }
-            }
-            initParticles();
-            function animateParticles() {
-                ctx.clearRect(0, 0, width, height);
-                const primaryColor = `rgb(${cachedPrimaryColor})`.trim();
-                
-                particles.forEach(p => {
-                    p.update();
-                    p.draw();
-                });
-                
-                for (let i = 0; i < particles.length; i++) {
-                    const p1 = particles[i];
-                    
-                    if (mouse.x !== null && mouse.y !== null) {
-                        const dx = p1.x - mouse.x;
-                        const dy = p1.y - mouse.y;
-                        const dist = Math.sqrt(dx * dx + dy * dy);
-                        if (dist < connectionDist + 30) {
-                            ctx.beginPath();
-                            ctx.moveTo(p1.x, p1.y);
-                            ctx.lineTo(mouse.x, mouse.y);
-                            ctx.strokeStyle = primaryColor + '12';
-                            ctx.lineWidth = 0.8;
-                            ctx.stroke();
-                        }
-                    }
-                    
-                    for (let j = i + 1; j < particles.length; j++) {
-                        const p2 = particles[j];
-                        const dx = p1.x - p2.x;
-                        const dy = p1.y - p2.y;
-                        const dist = Math.sqrt(dx * dx + dy * dy);
-                        
-                        if (dist < connectionDist) {
-                            ctx.beginPath();
-                            ctx.moveTo(p1.x, p1.y);
-                            ctx.lineTo(p2.x, p2.y);
-                            ctx.strokeStyle = primaryColor + '08';
-                            ctx.lineWidth = 0.5;
-                            ctx.stroke();
-                        }
-                    }
-                }
-                if (!document.hidden) { requestAnimationFrame(animateParticles); } else { document.addEventListener("visibilitychange", function resumeParticles() { if(!document.hidden) { document.removeEventListener("visibilitychange", resumeParticles); requestAnimationFrame(animateParticles); } }); }
-            }
-            animateParticles();
-        })();
-// --- NEW CREATIVE FEATURES & FIXES ---
-
-// Lenis Smooth Scrolling
-// Keep one animation owner. Lenis is manually driven by GSAP when both are available.
-const lenis = !prefersReducedMotion && lenisConstructor && gsapApi && scrollTriggerApi
-    ? new lenisConstructor({ autoRaf: false })
-    : null;
-
-if (lenis) {
-    lenis.on('scroll', scrollTriggerApi.update);
-    gsapApi.ticker.add((time) => lenis.raf(time * 1000));
-    gsapApi.ticker.lagSmoothing(0);
-}
-
-const canRevealSections = Boolean(!prefersReducedMotion && gsapApi && scrollTriggerApi);
-
-if (gsapApi && scrollTriggerApi) {
-    gsapApi.registerPlugin(scrollTriggerApi);
-}
-
-if (canRevealSections) {
-    document.querySelectorAll('.reveal-on-scroll').forEach(el => {
-        el.classList.remove('reveal-on-scroll');
-    });
-
-    gsapApi.utils.toArray('.section-header').forEach(header => {
-        const title = header.querySelector('.section-title');
-        const subtitle = header.querySelector('.section-subtitle');
-
-        if(title) {
-            gsapApi.from(title, {
-                scrollTrigger: {
-                    trigger: header,
-                    start: "top 85%",
-                    toggleActions: "play none none none"
-                },
-                opacity: 0,
-                y: 50,
-                duration: 0.8,
-                ease: "power3.out"
-            });
-        }
-
-        if(subtitle) {
-            gsapApi.from(subtitle, {
-                scrollTrigger: {
-                    trigger: header,
-                    start: "top 85%",
-                },
-                opacity: 0,
-                x: -50,
-                duration: 0.6,
-                delay: 0.2
-            });
-        }
-    });
-} else {
-    document.querySelectorAll('.reveal-on-scroll').forEach(el => {
-        el.classList.add('active');
-    });
-}
-
-// Hero name animation
-const heroName = document.querySelector('.hero-name');
-if(heroName) {
-    window.heroNameElement = heroName;
-}
-
-// Page Visibility API & Performance Fixes
-document.addEventListener("visibilitychange", () => {
-    if (!gsapApi) return;
-    if (document.hidden) {
-        gsapApi.globalTimeline.pause();
-    } else {
-        gsapApi.globalTimeline.play();
-    }
-});
-
 // 8. Prompt Engineering Lab Logic
 document.addEventListener('DOMContentLoaded', () => {
     const promptTabs = document.querySelectorAll('.prompt-tab');
@@ -933,6 +638,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 promptCodeDisplay.offsetHeight; /* trigger reflow */
                 promptCodeDisplay.style.animation = null;
                 promptCodeDisplay.textContent = promptsData[promptKey];
+                emitPortfolioMotion('prompt-change', { panel: promptCodeDisplay });
             });
         });
 

@@ -31,24 +31,29 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
     <link rel="stylesheet" href="style.css">
-    <!-- CDN Scripts -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js" defer></script>
-    <script src="https://unpkg.com/lenis@1.3.23/dist/lenis.min.js" defer></script>
+    <link rel="stylesheet" href="motion.css">
 
 </head>
 <body>
     <a class="skip-link" href="#main-content">Skip to content</a>
-    <!-- Elite Preloader -->
-    <div id="preloader" class="elite-preloader">
-        <div class="counter">0%</div>
+
+    <div class="journey-progress" aria-hidden="true">
+        <span id="journeyProgressBar"></span>
     </div>
+
+    <nav class="journey-rail" aria-label="Portfolio chapters">
+        <span class="journey-rail-title" aria-hidden="true">Journey</span>
+        <a href="#home" data-scene-link="home" class="active" aria-current="location"><span>Introduction</span></a>
+        <a href="#projects" data-scene-link="projects"><span>Selected work</span></a>
+        <a href="#about" data-scene-link="about"><span>Profile</span></a>
+        <a href="#timeline" data-scene-link="timeline"><span>Path</span></a>
+        <a href="#resume" data-scene-link="resume"><span>Resume</span></a>
+        <a href="#contact" data-scene-link="contact"><span>Contact</span></a>
+    </nav>
+
     <!-- Noise Overlay -->
     <div class="noise-overlay"></div>
 
-
-    <!-- Neural Network Particle Canvas -->
-    <canvas id="neuralCanvas" aria-hidden="true" style="position:fixed; top:0; left:0; width:100vw; height:100vh; z-index:-2; pointer-events:none;"></canvas>
 
     <!-- Ambient Grid & Glow Backgrounds -->
 
@@ -109,18 +114,20 @@
                     </div>
                     
                     <div class="profile-container">
-                        <div class="profile-frame">
-                            <div class="frame-accent accent-tl"></div>
-                            <div class="frame-accent accent-tr"></div>
-                            <div class="frame-accent accent-bl"></div>
-                            <div class="frame-accent accent-br"></div>
-                            <div class="profile-scan"></div>
-                            <div class="profile-image-wrapper">
-                                <img src="profile.webp" alt="Nithin Polavarapu" loading="eager" fetchpriority="high" decoding="async" width="300" height="300">
-                            </div>
-                            <div class="profile-stats-badge">
-                                <i class="fa-solid fa-bolt-lightning"></i>
-                                <span>B.Tech AI/ML @ Parul University</span>
+                        <div class="profile-motion-layer">
+                            <div class="profile-frame">
+                                <div class="frame-accent accent-tl"></div>
+                                <div class="frame-accent accent-tr"></div>
+                                <div class="frame-accent accent-bl"></div>
+                                <div class="frame-accent accent-br"></div>
+                                <div class="profile-scan"></div>
+                                <div class="profile-image-wrapper">
+                                    <img src="profile.webp" alt="Nithin Polavarapu" loading="eager" fetchpriority="high" decoding="async" width="300" height="300">
+                                </div>
+                                <div class="profile-stats-badge">
+                                    <i class="fa-solid fa-bolt-lightning"></i>
+                                    <span>B.Tech AI/ML @ Parul University</span>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -513,9 +520,21 @@
                 </div>
 
                 <h3 class="projects-archive-title">Research and prototypes</h3>
+
+                <div class="archive-controls" aria-label="Research project navigation">
+                    <button type="button" class="archive-nav-button" id="archivePrevious" aria-label="Previous research project">
+                        <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
+                        <span>Previous</span>
+                    </button>
+                    <div class="archive-progress" aria-hidden="true"><span id="archiveProgressBar"></span></div>
+                    <button type="button" class="archive-nav-button" id="archiveNext" aria-label="Next research project">
+                        <span>Next</span>
+                        <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+                    </button>
+                </div>
                 
                 <div class="projects-gallery-wrapper">
-                    <div class="projects-gallery">
+                    <div class="projects-gallery" id="projectArchiveRail" tabindex="0" aria-label="Research and prototype projects">
                     <!-- Project 1: AI Business Analytics -->
                     <div class="project-card">
                         <div class="project-header">
@@ -1139,7 +1158,7 @@
                 <a href="#contact">Contact</a>
             </div>
             <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 10px;">
-                &copy; 2026 Nithin Polavarapu. Built with HTML, CSS, and JavaScript.
+                &copy; 2026 Nithin Polavarapu. Built with HTML, CSS, JavaScript, and Motion.
             </p>
             <p class="footer-text">
                 Open to conversations about practical AI systems.
@@ -1190,6 +1209,7 @@
 
     <!-- JavaScript Interactions -->
     <script src="script.js" defer></script>
+    <script type="module" src="motion-experience.js"></script>
 
 </body>
 </html>
