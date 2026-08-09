@@ -1,663 +1,177 @@
-
-const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-function emitPortfolioMotion(type, detail = {}) {
-    document.dispatchEvent(new CustomEvent(`portfolio:${type}`, { detail }));
-}
+const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 document.addEventListener('DOMContentLoaded', () => {
-            // Keep the source markup readable while presenting the founder-led order visually.
-            const mainContent = document.getElementById('main-content');
-            const initialHashId = window.location.hash ? window.location.hash.slice(1) : '';
-            const sectionOrder = ['home', 'projects', 'about', 'skills', 'timeline', 'prompts', 'resume', 'achievements', 'contact'];
-            if (mainContent) {
-                sectionOrder.forEach((sectionId) => {
-                    const section = document.getElementById(sectionId);
-                    if (section && section.parentElement === mainContent) mainContent.appendChild(section);
-                });
-                if (initialHashId) {
-                    requestAnimationFrame(() => {
-                        document.getElementById(initialHashId)?.scrollIntoView({ behavior: 'auto', block: 'start' });
-                    });
-                }
-            }
-            
-            // 1. Floating Navbar Scroll Adjustments & Back To Top visibility
-            const navbar = document.getElementById('navbar');
-            const backToTop = document.getElementById('backToTop');
-            const sections = document.querySelectorAll('section');
-            const navLinks = document.querySelectorAll('.nav-menu li a');
-            
-            // Intersection Observer for Sections (Active Nav Links)
-            const sectionObserver = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        const currentId = entry.target.getAttribute('id');
-                            navLinks.forEach(link => {
-                            link.classList.remove('active');
-                            link.removeAttribute('aria-current');
-                            if (link.getAttribute('href') === `#${currentId}`) {
-                                link.classList.add('active');
-                                link.setAttribute('aria-current', 'location');
-                            }
-                        });
-                    }
-                });
-            }, { threshold: 0.2, rootMargin: "-100px 0px -100px 0px" });
-            sections.forEach(sec => sectionObserver.observe(sec));
+    setupNavigation();
+    setupCaseStudy();
+    setupMemoryLab();
+    setupContactForm();
+});
 
-            // Scroll state uses observers instead of a per-frame scroll listener.
-            const createScrollMarker = (top) => {
-                const marker = document.createElement('div');
-                marker.setAttribute('aria-hidden', 'true');
-                marker.style.cssText = `position: absolute; top: ${top}px; left: 0; width: 1px; height: 1px; pointer-events: none; opacity: 0;`;
-                document.body.appendChild(marker);
-                return marker;
-            };
+function setupNavigation() {
+    const header = document.getElementById('siteHeader');
+    const toggle = document.getElementById('menuToggle');
+    const links = document.getElementById('navLinks');
+    const hero = document.getElementById('home');
 
-            const navMarker = createScrollMarker(50);
-            const backToTopMarker = createScrollMarker(500);
-            const navStateObserver = new IntersectionObserver(([entry]) => {
-                navbar.classList.toggle('scrolled', !entry.isIntersecting);
-            });
-            const backToTopObserver = new IntersectionObserver(([entry]) => {
-                backToTop.classList.toggle('show', !entry.isIntersecting);
-            });
-            navStateObserver.observe(navMarker);
-            backToTopObserver.observe(backToTopMarker);
-
-            // 3. Mobile Menu Toggle
-            const mobileToggle = document.getElementById('mobileToggle');
-            const navMenu = document.getElementById('navMenu');
-
-            const syncMobileNavState = () => {
-                const isMobile = window.matchMedia('(max-width: 900px)').matches;
-                const isOpen = navMenu.classList.contains('active');
-                navMenu.inert = isMobile && !isOpen;
-                navMenu.setAttribute('aria-hidden', String(isMobile && !isOpen));
-            };
-            syncMobileNavState();
-            window.addEventListener('resize', syncMobileNavState, { passive: true });
-            
-            mobileToggle.addEventListener('click', () => {
-                const isOpen = navMenu.classList.toggle('active');
-                mobileToggle.setAttribute('aria-expanded', String(isOpen));
-                syncMobileNavState();
-                emitPortfolioMotion('mobile-nav', { menu: navMenu, isOpen });
-                const icon = mobileToggle.querySelector('i');
-                if (isOpen) {
-                    icon.className = 'fa-solid fa-xmark';
-                } else {
-                    icon.className = 'fa-solid fa-bars-staggered';
-                }
-            });
-
-            // Close mobile menu when nav item clicked
-            document.querySelectorAll('.nav-item a').forEach(link => {
-                link.addEventListener('click', () => {
-                    navMenu.classList.remove('active');
-                    mobileToggle.setAttribute('aria-expanded', 'false');
-                    syncMobileNavState();
-                    mobileToggle.querySelector('i').className = 'fa-solid fa-bars-staggered';
-                });
-            });
-
-            // 4. Skills Grid Filter & Bar Animation trigger
-            const filterBtns = document.querySelectorAll('.filter-btn');
-            const skillItems = document.querySelectorAll('.skill-item');
-            
-            filterBtns.forEach(btn => {
-                btn.addEventListener('click', () => {
-                    filterBtns.forEach(b => {
-                        b.classList.remove('active');
-                        b.setAttribute('aria-pressed', 'false');
-                    });
-                    btn.classList.add('active');
-                    btn.setAttribute('aria-pressed', 'true');
-                    
-                    const filterValue = btn.getAttribute('data-filter');
-                    
-                    skillItems.forEach(item => {
-                        if (filterValue === 'all' || item.getAttribute('data-category') === filterValue) {
-                            item.style.display = 'flex';
-                            setTimeout(() => { item.style.opacity = '1'; item.style.transform = 'scale(1)'; }, 10);
-                        } else {
-                            item.style.opacity = '0';
-                            item.style.transform = 'scale(0.85)';
-                            setTimeout(() => { item.style.display = 'none'; }, 300);
-                        }
-                    });
-                });
-            });
-
-            // Trigger progress bar widths using Intersection Observer
-            const skillBars = document.querySelectorAll('.skill-progress-bar');
-            const skillsObserver = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        const bar = entry.target;
-                        bar.style.width = bar.getAttribute('data-width');
-                        skillsObserver.unobserve(bar);
-                    }
-                });
-            }, { threshold: 0.1 });
-            skillBars.forEach(bar => skillsObserver.observe(bar));
-
-            // 6. Keep content available without the optional Motion enhancement.
-            const reveals = document.querySelectorAll('.reveal-on-scroll');
-            reveals.forEach(el => el.classList.add('active'));
-        });
-
-        // 7. Toggle Project Details Drawer
-        function toggleDetails(btn) {
-            const cardBody = btn.closest('.project-body');
-            const detailsContent = cardBody.querySelector('.project-details-content');
-            const icon = btn.querySelector('i');
-            const label = btn.querySelector('span');
-            
-            detailsContent.classList.toggle('expanded');
-            const isExpanded = detailsContent.classList.contains('expanded');
-            btn.setAttribute('aria-expanded', String(isExpanded));
-            detailsContent.setAttribute('aria-hidden', String(!isExpanded));
-            emitPortfolioMotion('details', { panel: detailsContent, isOpen: isExpanded });
-            
-            if (detailsContent.classList.contains('expanded')) {
-                icon.className = 'fa-solid fa-chevron-up';
-                label.textContent = 'Hide Details';
-            } else {
-                icon.className = 'fa-solid fa-chevron-down';
-                label.textContent = 'Show Pipeline Details';
-            }
+    const closeMenu = () => {
+        const wasOpen = links.classList.contains('is-open');
+        links.classList.remove('is-open');
+        toggle.setAttribute('aria-expanded', 'false');
+        document.body.classList.remove('menu-open');
+        if (wasOpen) {
+            document.dispatchEvent(new CustomEvent('portfolio:menu', {
+                detail: { menu: links, open: false }
+            }));
         }
-
-        // 8. Switch Resume Tabs
-        function switchResumeTab(tabName) {
-            const btnPdf = document.querySelectorAll('.resume-tab-btn')[1];
-            const btnInteractive = document.querySelectorAll('.resume-tab-btn')[0];
-            
-            const tabPdf = document.getElementById('pdfResumeTab');
-            const tabInteractive = document.getElementById('interactiveResumeTab');
-            
-            if (tabName === 'pdf') {
-                btnPdf.classList.add('active');
-                btnInteractive.classList.remove('active');
-                tabPdf.classList.add('active');
-                tabInteractive.classList.remove('active');
-            } else {
-                btnInteractive.classList.add('active');
-                btnPdf.classList.remove('active');
-                tabInteractive.classList.add('active');
-                tabPdf.classList.remove('active');
-            }
-
-            [btnInteractive, btnPdf].forEach(btn => {
-                btn.setAttribute('aria-pressed', String(btn.classList.contains('active')));
-            });
-            [tabInteractive, tabPdf].forEach(panel => {
-                panel.setAttribute('aria-hidden', String(!panel.classList.contains('active')));
-            });
-            emitPortfolioMotion('resume-tab', {
-                panel: tabName === 'pdf' ? tabPdf : tabInteractive
-            });
-        }
-
-        // 9. Scroll to Top function
-        function scrollToTop() {
-            window.scrollTo({ top: 0, behavior: prefersReducedMotion ? 'auto' : 'smooth' });
-        }
-
-        // 10. Contact Form Submission Upgraded Handler
-        const contactModal = document.getElementById('contactModal');
-        const contactCloseButton = contactModal?.querySelector('button');
-        let contactReturnFocus = null;
-
-        function handleFormSubmit(e) {
-            e.preventDefault();
-            const name = document.getElementById('formName').value;
-            const email = document.getElementById('formEmail').value;
-            const subject = document.getElementById('formSubject').value;
-            const message = document.getElementById('formMessage').value;
-            
-            const submitBtn = e.target.querySelector('button[type="submit"]');
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Preparing Message...';
-
-            // This is a static site, so prepare an email draft instead of claiming a backend send.
-            submitBtn.disabled = false;
-            submitBtn.innerHTML = 'Prepare Email <i class="fa-regular fa-paper-plane"></i>';
-
-            const detailsEl = document.getElementById('contactModalDetails');
-            detailsEl.textContent = `Name: ${name}\nReply-to: ${email}\nSubject: ${subject}\n\nYour message is ready to send.`;
-
-            // Setup email draft action
-            document.getElementById('fallbackMailtoBtn').onclick = () => {
-                const mailtoUrl = `mailto:nithinpolavarapu@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent("Name: " + name + "\nEmail: " + email + "\n\nMessage:\n" + message)}`;
-                window.location.href = mailtoUrl;
-            };
-
-            // Setup copy payload action
-            document.getElementById('copyPayloadBtn').onclick = () => {
-                const payload = `Name: ${name}\nEmail: ${email}\nSubject: ${subject}\nMessage: ${message}`;
-                if (!navigator.clipboard) {
-                    showToast("Clipboard access is unavailable here.");
-                    return;
-                }
-                navigator.clipboard.writeText(payload)
-                    .then(() => showToast("Message copied to clipboard!"))
-                    .catch(() => showToast("Failed to copy message."));
-            };
-
-            contactReturnFocus = document.activeElement;
-            contactModal.inert = false;
-            contactModal.classList.add('active');
-            emitPortfolioMotion('modal-open', {
-                modal: contactModal,
-                card: contactModal.querySelector('.contact-modal-card')
-            });
-            contactCloseButton?.focus();
-            e.target.reset();
-        }
-
-        function closeContactModal() {
-            contactModal.classList.remove('active');
-            contactModal.inert = true;
-            contactReturnFocus?.focus();
-            showToast("Message prepared. Choose an email option to send it.");
-        }
-
-        function getModalFocusableElements() {
-            return Array.from(contactModal.querySelectorAll('a[href], button:not([disabled]), input:not([disabled]), textarea:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])'))
-                .filter(element => !element.hasAttribute('hidden'));
-        }
-
-        document.addEventListener('keydown', (event) => {
-            if (!contactModal.classList.contains('active')) return;
-
-            if (event.key === 'Escape') {
-                closeContactModal();
-                return;
-            }
-
-            if (event.key === 'Tab') {
-                const focusableElements = getModalFocusableElements();
-                if (!focusableElements.length) {
-                    event.preventDefault();
-                    return;
-                }
-
-                const firstElement = focusableElements[0];
-                const lastElement = focusableElements[focusableElements.length - 1];
-
-                if (!contactModal.contains(document.activeElement)) {
-                    event.preventDefault();
-                    (event.shiftKey ? lastElement : firstElement).focus();
-                } else if (event.shiftKey && document.activeElement === firstElement) {
-                    event.preventDefault();
-                    lastElement.focus();
-                } else if (!event.shiftKey && document.activeElement === lastElement) {
-                    event.preventDefault();
-                    firstElement.focus();
-                }
-            }
-        });
-
-        function showToast(msg) {
-            const toast = document.getElementById('toastBox');
-            const toastMsg = document.getElementById('toastMsg');
-            toastMsg.textContent = msg;
-            toast.classList.add('show');
-            setTimeout(() => {
-                toast.classList.remove('show');
-            }, 4000);
-        }
-
-        // 11. Simulated ML Playgrounds Interactions
-        function togglePlayground(num, btn) {
-            const panel = document.getElementById(`playground-${num}`);
-            const icon = btn.querySelector('i');
-            const text = btn.querySelector('span');
-            
-            panel.classList.toggle('active');
-            const isOpen = panel.classList.contains('active');
-            btn.setAttribute('aria-expanded', String(isOpen));
-            panel.setAttribute('aria-hidden', String(!isOpen));
-            emitPortfolioMotion('playground', { panel, isOpen });
-            if (isOpen) {
-                icon.className = 'fa-solid fa-square-minus';
-                text.textContent = 'Close prototype';
-                panel.scrollIntoView({ behavior: prefersReducedMotion ? 'auto' : 'smooth', block: 'nearest' });
-            } else {
-                icon.className = 'fa-solid fa-play';
-                text.textContent = 'Prototype demo';
-            }
-        }
-
-        // Project 1: Enterprise Analytics Simulation
-        function runSimulation1(btn) {
-            const select = document.getElementById('ds-1');
-            const consoleEl = document.getElementById('console-1');
-            const progContainer = document.getElementById('progress-container-1');
-            const progressBar = document.getElementById('progress-bar-1');
-            const resultEl = document.getElementById('result-1');
-            const metricsEl = document.getElementById('metrics-1');
-            
-            consoleEl.innerHTML = '';
-            consoleEl.classList.add('active');
-            consoleEl.setAttribute('aria-busy', 'true');
-            progContainer.style.display = 'block';
-            progressBar.style.width = '0%';
-            resultEl.classList.remove('active');
-            resultEl.setAttribute('aria-busy', 'true');
-            btn.disabled = true;
-            btn.style.opacity = '0.5';
-
-            const selectedSource = select.options[select.selectedIndex].text;
-            
-            const logs = [
-                { text: `[INFO] Initializing example data source...`, type: 'info', delay: 200 },
-                { text: `[INFO] Reading sample source: "${selectedSource}"`, type: 'info', delay: 600 },
-                { text: `[SUCCESS] Simulated read-only connection step complete.`, type: 'success', delay: 1000 },
-                { text: `[INFO] Running sample preprocessing modules...`, type: 'info', delay: 1500 },
-                { text: `[INFO] Preparing sample features for the prototype flow...`, type: 'info', delay: 2200 },
-                { text: `[SUCCESS] Prototype decision view prepared.`, type: 'success', delay: 2800 },
-                { text: `[SUCCESS] Example output is ready for review.`, type: 'success', delay: 3000 }
-            ];
-
-            logs.forEach(log => {
-                setTimeout(() => {
-                    const p = document.createElement('p');
-                    p.className = `playground-console-line ${log.type}`;
-                    p.textContent = log.text;
-                    consoleEl.appendChild(p);
-                    consoleEl.scrollTop = consoleEl.scrollHeight;
-                }, log.delay);
-            });
-
-            let pct = 0;
-            const interval = setInterval(() => {
-                pct += 2;
-                progressBar.style.width = `${pct}%`;
-                if (pct >= 100) {
-                    clearInterval(interval);
-                }
-            }, 60);
-
-            setTimeout(() => {
-                btn.disabled = false;
-                btn.style.opacity = '1';
-                progContainer.style.display = 'none';
-                
-                let metricsHTML = '';
-                if (select.value === 'sales') {
-                    metricsHTML = `
-                        <div class="playground-metric"><span>Model fit (sample):</span><strong>Strong</strong></div>
-                        <div class="playground-metric"><span>Trend direction:</span><strong>Positive</strong></div>
-                        <div class="playground-metric"><span>Outlier scan:</span><strong>Clear</strong></div>
-                    `;
-                } else if (select.value === 'churn') {
-                    metricsHTML = `
-                        <div class="playground-metric"><span>Risk signal (sample):</span><strong style="color:var(--primary)">Low</strong></div>
-                        <div class="playground-metric"><span>Classifier signal:</span><strong>Stable</strong></div>
-                        <div class="playground-metric"><span>Top signal:</span><strong>Support response latency</strong></div>
-                    `;
-                } else {
-                    metricsHTML = `
-                        <div class="playground-metric"><span>Click signal (sample):</span><strong>Positive</strong></div>
-                        <div class="playground-metric"><span>Recommendation:</span><strong>Review social channels</strong></div>
-                        <div class="playground-metric"><span>Review cue:</span><strong>Positive</strong></div>
-                    `;
-                }
-                metricsEl.innerHTML = metricsHTML;
-                consoleEl.setAttribute('aria-busy', 'false');
-                resultEl.setAttribute('aria-busy', 'false');
-                resultEl.classList.add('active');
-            }, 3100);
-        }
-
-        // Project 2: Diagnostics Classifier Simulation
-        function runSimulation2(btn) {
-            const age = parseInt(document.getElementById('age-2').value) || 45;
-            const hr = parseInt(document.getElementById('hr-2').value) || 72;
-            const bp = parseInt(document.getElementById('bp-2').value) || 128;
-            
-            const consoleEl = document.getElementById('console-2');
-            const progContainer = document.getElementById('progress-container-2');
-            const progressBar = document.getElementById('progress-bar-2');
-            const resultEl = document.getElementById('result-2');
-            const metricsEl = document.getElementById('metrics-2');
-            
-            consoleEl.innerHTML = '';
-            consoleEl.classList.add('active');
-            consoleEl.setAttribute('aria-busy', 'true');
-            progContainer.style.display = 'block';
-            progressBar.style.width = '0%';
-            resultEl.classList.remove('active');
-            resultEl.setAttribute('aria-busy', 'true');
-            btn.disabled = true;
-            btn.style.opacity = '0.5';
-
-            const logs = [
-                { text: `[INFO] Prototype classifier initialized...`, type: 'info', delay: 200 },
-                { text: `[INFO] Checking input vectors: [Age: ${age}, RestHR: ${hr}, BP: ${bp}]`, type: 'info', delay: 500 },
-                { text: `[INFO] Aligning sample inputs with the feature schema...`, type: 'info', delay: 1000 },
-                { text: `[INFO] Running the illustrative classifier flow...`, type: 'info', delay: 1600 },
-                { text: `[SUCCESS] Illustrative output generated. Preparing review state.`, type: 'success', delay: 2200 },
-                { text: `[SUCCESS] Prototype output prepared for review.`, type: 'success', delay: 2600 }
-            ];
-
-            logs.forEach(log => {
-                setTimeout(() => {
-                    const p = document.createElement('p');
-                    p.className = `playground-console-line ${log.type}`;
-                    p.textContent = log.text;
-                    consoleEl.appendChild(p);
-                    consoleEl.scrollTop = consoleEl.scrollHeight;
-                }, log.delay);
-            });
-
-            let pct = 0;
-            const interval = setInterval(() => {
-                pct += 2.5;
-                progressBar.style.width = `${pct}%`;
-                if (pct >= 100) {
-                    clearInterval(interval);
-                }
-            }, 65);
-
-            setTimeout(() => {
-                btn.disabled = false;
-                btn.style.opacity = '1';
-                progContainer.style.display = 'none';
-                
-                const reviewSignal = bp > 140 || hr > 90 || age > 60;
-                const status = reviewSignal ? "Review signal" : "No review signal";
-                
-                metricsEl.innerHTML = `
-                    <div class="playground-metric"><span>Prototype screen:</span><strong style="color:var(--primary)">${status}</strong></div>
-                    <div class="playground-metric"><span>Input handling:</span><strong>Preprocessed</strong></div>
-                    <div class="playground-metric"><span>Output type:</span><strong>Illustrative classification</strong></div>
-                    <div class="playground-metric"><span>Safety note:</span><strong style="color:var(--primary)">Not a diagnosis</strong></div>
-                `;
-                consoleEl.setAttribute('aria-busy', 'false');
-                resultEl.setAttribute('aria-busy', 'false');
-                resultEl.classList.add('active');
-            }, 2750);
-        }
-
-        // Project 3: Next Word Text Prediction Simulation
-        function runSimulation3(btn) {
-            const seed = document.getElementById('seed-3');
-            const temp = document.getElementById('temp-3').value;
-            const consoleEl = document.getElementById('console-3');
-            const progContainer = document.getElementById('progress-container-3');
-            const progressBar = document.getElementById('progress-bar-3');
-            const resultEl = document.getElementById('result-3');
-            const metricsEl = document.getElementById('metrics-3');
-            
-            consoleEl.innerHTML = '';
-            consoleEl.classList.add('active');
-            consoleEl.setAttribute('aria-busy', 'true');
-            progContainer.style.display = 'block';
-            progressBar.style.width = '0%';
-            resultEl.classList.remove('active');
-            resultEl.setAttribute('aria-busy', 'true');
-            btn.disabled = true;
-            btn.style.opacity = '0.5';
-
-            const logs = [
-                { text: `[INFO] Tokenizer initialized. Encoding prompt input...`, type: 'info', delay: 100 },
-                { text: `[INFO] Seed prepared for prototype inference.`, type: 'info', delay: 400 },
-                { text: `[INFO] Loading the PyTorch inference graph...`, type: 'info', delay: 800 },
-                { text: `[INFO] Generating sequential tokens (Temperature: ${temp})...`, type: 'info', delay: 1300 }
-            ];
-
-            logs.forEach(log => {
-                setTimeout(() => {
-                    const p = document.createElement('p');
-                    p.className = `playground-console-line ${log.type}`;
-                    p.textContent = log.text;
-                    consoleEl.appendChild(p);
-                    consoleEl.scrollTop = consoleEl.scrollHeight;
-                }, log.delay);
-            });
-
-            let pct = 0;
-            const interval = setInterval(() => {
-                pct += 3.3;
-                progressBar.style.width = `${pct}%`;
-                if (pct >= 100) {
-                    clearInterval(interval);
-                }
-            }, 50);
-
-            let tokens = [];
-            let seedText = seed.options[seed.selectedIndex].text;
-            
-            if (seed.value === 'model') {
-                tokens = ["trained", " on", " PyTorch", " to", " optimize", " computational", " graphs", " and", " predict", " sequential", " data", " values."];
-            } else if (seed.value === 'net') {
-                tokens = ["discover", " complex,", " hidden", " mathematical", " patterns", " across", " massive", " scale", " high-dimensional", " enterprise", " systems."];
-            } else {
-                tokens = ["automate", " manual", " business", " pipelines", " while", " maintaining", " ethical", " compliance", " and", " human", " agency."];
-            }
-
-            setTimeout(() => {
-                progContainer.style.display = 'none';
-                metricsEl.innerHTML = `<span style="font-family:'Fira Code', monospace; font-size:0.9rem; line-height:1.6; display:inline-block;"><strong style="color:var(--primary)">${seedText}</strong> </span>`;
-                resultEl.classList.add('active');
-                
-                let delay = 0;
-                tokens.forEach((token, idx) => {
-                    setTimeout(() => {
-                        const span = document.createElement('span');
-                        span.textContent = token;
-                        span.style.opacity = '0';
-                        span.style.transition = 'opacity 0.2s';
-                        metricsEl.querySelector('span').appendChild(span);
-                        setTimeout(() => span.style.opacity = '1', 20);
-                        
-                        const p = document.createElement('p');
-                        p.className = 'playground-console-line success';
-                        p.textContent = `[INFERENCE] Predicted token #${idx+1}: "${token.trim()}"`;
-                        consoleEl.appendChild(p);
-                        consoleEl.scrollTop = consoleEl.scrollHeight;
-
-                        if (idx === tokens.length - 1) {
-                            btn.disabled = false;
-                            btn.style.opacity = '1';
-                            consoleEl.setAttribute('aria-busy', 'false');
-                            resultEl.setAttribute('aria-busy', 'false');
-                        }
-                    }, delay);
-                    delay += 180;
-                });
-            }, 1600);
-        }
-
-        // 12. Theme Customizer Logic
-        function setTheme(themeName) {
-            const root = document.documentElement;
-            const buttons = document.querySelectorAll('.theme-btn');
-            buttons.forEach(btn => btn.classList.remove('active'));
-            
-            if (themeName === 'cyan') {
-                root.style.setProperty('--primary', '#00f5d4');
-                root.style.setProperty('--primary-rgb', '0, 245, 212');
-                root.style.setProperty('--primary-hover', '#00e0c2');
-                root.style.setProperty('--secondary', '#7209b7');
-                root.style.setProperty('--accent', '#f72585');
-                root.style.setProperty('--glow-color', 'rgba(0, 245, 212, 0.35)');
-                document.querySelector('.theme-btn[title="Cyber Cyan"]').classList.add('active');
-                showToast("Accent theme set to Cyber Cyan");
-            } else if (themeName === 'purple') {
-                root.style.setProperty('--primary', '#8338ec');
-                root.style.setProperty('--primary-rgb', '131, 56, 236');
-                root.style.setProperty('--primary-hover', '#7028d4');
-                root.style.setProperty('--secondary', '#3a86c8');
-                root.style.setProperty('--accent', '#ff006e');
-                root.style.setProperty('--glow-color', 'rgba(131, 56, 236, 0.35)');
-                document.querySelector('.theme-btn[title="Electric Purple"]').classList.add('active');
-                showToast("Accent theme set to Electric Purple");
-            } else if (themeName === 'crimson') {
-                root.style.setProperty('--primary', '#ff0055');
-                root.style.setProperty('--primary-rgb', '255, 0, 85');
-                root.style.setProperty('--primary-hover', '#e6004d');
-                root.style.setProperty('--secondary', '#8000ff');
-                root.style.setProperty('--accent', '#ffaa00');
-                root.style.setProperty('--glow-color', 'rgba(255, 0, 85, 0.35)');
-                document.querySelector('.theme-btn[title="Crimson Matrix"]').classList.add('active');
-                showToast("Accent theme set to Crimson Matrix");
-            }
-        }
-
-// 8. Prompt Engineering Lab Logic
-document.addEventListener('DOMContentLoaded', () => {
-    const promptTabs = document.querySelectorAll('.prompt-tab');
-    const promptCodeDisplay = document.getElementById('promptCodeDisplay');
-    const copyPromptBtn = document.getElementById('copyPromptBtn');
-    const copyPromptText = document.getElementById('copyPromptText');
-
-    const promptsData = {
-        data: '"Act as a Senior Data Architect. I will provide you with unstructured JSON logs. Your task is to extract all nested features, handle missing data points by imputing the median where logical, and output a flattened, normalized CSV-compatible format suitable for XGBoost training. Provide only the resulting structure, no explanations."',
-        analyze: '"Analyze the following time-series dataset. Identify any seasonal anomalies, trend shifts, or cyclic patterns. Generate a Python script using pandas and statsmodels to visualize the decomposition of these components. Focus on robust detection of outliers over 3 standard deviations."',
-        optimize: '"You are an expert Machine Learning Engineer. Review the provided PyTorch neural network architecture. Optimize the model for inference latency without sacrificing more than 1% accuracy. Suggest quantization strategies, operator fusion techniques, and provide the updated forward pass code."'
     };
 
-    if (promptTabs.length > 0) {
-        promptTabs.forEach(tab => {
-            tab.addEventListener('click', () => {
-                promptTabs.forEach(t => {
-                    t.classList.remove('active');
-                    t.setAttribute('aria-pressed', 'false');
-                });
-                tab.classList.add('active');
-                tab.setAttribute('aria-pressed', 'true');
+    toggle.addEventListener('click', () => {
+        const open = !links.classList.contains('is-open');
+        links.classList.toggle('is-open', open);
+        toggle.setAttribute('aria-expanded', String(open));
+        document.body.classList.toggle('menu-open', open);
+        document.dispatchEvent(new CustomEvent('portfolio:menu', {
+            detail: { menu: links, open }
+        }));
+    });
 
-                const promptKey = tab.getAttribute('data-prompt');
-                promptCodeDisplay.style.animation = 'none';
-                promptCodeDisplay.offsetHeight; /* trigger reflow */
-                promptCodeDisplay.style.animation = null;
-                promptCodeDisplay.textContent = promptsData[promptKey];
-                emitPortfolioMotion('prompt-change', { panel: promptCodeDisplay });
+    links.querySelectorAll('a').forEach((link) => {
+        link.addEventListener('click', closeMenu);
+    });
+
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') closeMenu();
+    });
+
+    const headerObserver = new IntersectionObserver(([entry]) => {
+        header.classList.toggle('is-scrolled', entry.intersectionRatio < 0.95);
+    }, { threshold: [0.95] });
+    headerObserver.observe(hero);
+
+    const sectionLinks = [...links.querySelectorAll('a[href^="#"]')];
+    const sections = sectionLinks
+        .map((link) => document.querySelector(link.getAttribute('href')))
+        .filter(Boolean);
+
+    const sectionObserver = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+            if (!entry.isIntersecting) return;
+            sectionLinks.forEach((link) => {
+                const active = entry.target !== hero && link.getAttribute('href') === `#${entry.target.id}`;
+                link.classList.toggle('is-active', active);
+                if (active) link.setAttribute('aria-current', 'location');
+                else link.removeAttribute('aria-current');
             });
         });
+    }, { rootMargin: '-34% 0px -56% 0px', threshold: 0 });
 
-        copyPromptBtn.addEventListener('click', () => {
-            const textToCopy = promptCodeDisplay.textContent;
-            navigator.clipboard.writeText(textToCopy).then(() => {
-                copyPromptBtn.classList.add('success');
-                if (copyPromptText) copyPromptText.textContent = 'Copied!';
-                const icon = copyPromptBtn.querySelector('i');
-                if (icon) icon.className = 'fa-solid fa-check';
+    sectionObserver.observe(hero);
+    sections.forEach((section) => sectionObserver.observe(section));
+}
 
-                setTimeout(() => {
-                    copyPromptBtn.classList.remove('success');
-                    if (copyPromptText) copyPromptText.textContent = 'Copy';
-                    if (icon) icon.className = 'fa-regular fa-copy';
-                }, 2000);
-            }).catch(err => {
-                console.error("Clipboard copy failed", err);
-            });
-        });
+function setupCaseStudy() {
+    const steps = [...document.querySelectorAll('.case-step')];
+    const screens = [...document.querySelectorAll('[data-screen-image]')];
+    const caption = document.getElementById('screenCaption');
+    const captions = {
+        home: 'The product frames a complicated journey around the next best action.',
+        roadmap: 'The roadmap collects the right inputs before it recommends a stage, weekly focus, and official links.'
+    };
+
+    const activate = (step) => {
+        const screen = step.dataset.screen;
+        const previous = screens.find((image) => image.classList.contains('is-visible'));
+        const active = screens.find((image) => image.dataset.screenImage === screen);
+        steps.forEach((item) => item.classList.toggle('is-active', item === step));
+        screens.forEach((image) => image.classList.toggle('is-visible', image.dataset.screenImage === screen));
+        caption.textContent = captions[screen] || captions.home;
+        document.dispatchEvent(new CustomEvent('portfolio:case-screen', {
+            detail: { active, previous, caption }
+        }));
+    };
+
+    if (reducedMotion || window.matchMedia('(max-width: 800px)').matches) {
+        steps.forEach((step) => step.classList.add('is-active'));
+        return;
     }
-});
+
+    const observer = new IntersectionObserver((entries) => {
+        const activeEntry = entries
+            .filter((entry) => entry.isIntersecting)
+            .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+        if (activeEntry) activate(activeEntry.target);
+    }, { rootMargin: '-28% 0px -38% 0px', threshold: [0.2, 0.45, 0.7] });
+
+    steps.forEach((step) => observer.observe(step));
+}
+
+function setupMemoryLab() {
+    const canvas = document.getElementById('memoryCanvas');
+    const verb = document.getElementById('memoryVerb');
+    const output = document.getElementById('memoryOutput');
+    const controls = [...document.querySelectorAll('[data-memory-mode]')];
+    const states = {
+        retain: {
+            verb: 'Retain',
+            output: 'Useful context stays available'
+        },
+        retrieve: {
+            verb: 'Retrieve',
+            output: 'Relevant context returns on demand'
+        },
+        forget: {
+            verb: 'Let go',
+            output: 'Low-value context leaves the system'
+        }
+    };
+
+    controls.forEach((control) => {
+        control.addEventListener('click', () => {
+            const mode = control.dataset.memoryMode;
+            canvas.dataset.mode = mode;
+            verb.textContent = states[mode].verb;
+            output.textContent = states[mode].output;
+            controls.forEach((item) => {
+                const active = item === control;
+                item.classList.toggle('is-active', active);
+                item.setAttribute('aria-pressed', String(active));
+            });
+            document.dispatchEvent(new CustomEvent('portfolio:memory-change', {
+                detail: { canvas, mode }
+            }));
+        });
+    });
+}
+
+function setupContactForm() {
+    const form = document.getElementById('contactForm');
+    const toast = document.getElementById('toast');
+    let toastTimer;
+
+    const showToast = (message) => {
+        toast.textContent = message;
+        toast.classList.add('is-visible');
+        document.dispatchEvent(new CustomEvent('portfolio:toast', {
+            detail: { toast }
+        }));
+        window.clearTimeout(toastTimer);
+        toastTimer = window.setTimeout(() => toast.classList.remove('is-visible'), 2800);
+    };
+
+    form.addEventListener('submit', (event) => {
+        event.preventDefault();
+        if (!form.reportValidity()) return;
+
+        const data = new FormData(form);
+        const subject = data.get('subject');
+        const body = [
+            `Name: ${data.get('name')}`,
+            `Email: ${data.get('email')}`,
+            '',
+            String(data.get('message'))
+        ].join('\n');
+
+        showToast('Opening your email app. Your message is not stored here.');
+        window.location.href = `mailto:nithinpolavarapu@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    });
+}
