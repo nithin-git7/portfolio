@@ -1,2 +1,6 @@
 # Local resume source; the public site links only to the published PDF.
 Nithin_Polavarapu_Resume.docx
+node_modules/
+dist/
+.ssr/
+*.tsbuildinfo
