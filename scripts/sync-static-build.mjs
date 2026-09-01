@@ -22,7 +22,8 @@ if (!moduleScript) {
 const renderedHtml = template
   .replace(moduleScriptPattern, '')
   .replace(rootToken, `<div id="root">${render()}</div>`)
-  .replace('</body>', `  ${moduleScript}\n</body>`);
+  .replace('</body>', `  ${moduleScript}\n</body>`)
+  .replace(/\r\n/g, '\n');
 await writeFile(templatePath, renderedHtml, 'utf8');
 
 const files = [

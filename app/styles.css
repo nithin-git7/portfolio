@@ -493,6 +493,26 @@ img {
   top: 112px;
 }
 
+.project-heading {
+  margin-bottom: 26px;
+}
+
+.project-heading span {
+  color: var(--ink-muted);
+  font-family: "DM Mono Local", monospace;
+  font-size: 0.58rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.project-heading h3 {
+  margin: 8px 0 0;
+  font-size: clamp(1.8rem, 3vw, 2.7rem);
+  font-weight: 650;
+  letter-spacing: -0.05em;
+  line-height: 1.05;
+}
+
 .project-meta {
   display: grid;
   grid-template-columns: 62px 1fr;
@@ -759,6 +779,156 @@ img {
   padding: 18px 28px 24px;
   color: var(--ink-muted);
   font-size: 0.78rem;
+}
+
+.sourcebound-project {
+  display: grid;
+  grid-template-columns: minmax(290px, 0.68fr) minmax(0, 1.32fr);
+  align-items: center;
+  gap: clamp(3rem, 6vw, 6rem);
+  margin-top: clamp(6.5rem, 10vw, 10rem);
+  padding-top: clamp(5rem, 8vw, 7.5rem);
+  border-top: 1px solid var(--line);
+}
+
+.sourcebound-copy h3 {
+  max-width: 10ch;
+  margin: 18px 0 24px;
+  font-size: clamp(2.7rem, 5vw, 4.8rem);
+  font-weight: 600;
+  letter-spacing: -0.062em;
+  line-height: 0.98;
+}
+
+.sourcebound-copy > p:not(.section-index) {
+  max-width: 48ch;
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 0.96rem;
+  line-height: 1.7;
+}
+
+.sourcebound-actions {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-top: 32px;
+}
+
+.sourcebound-evidence {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1px;
+  margin: 38px 0 0;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-input);
+  overflow: hidden;
+  background: var(--line);
+}
+
+.sourcebound-evidence > div {
+  min-width: 0;
+  padding: 14px;
+  background: var(--canvas-soft);
+}
+
+.sourcebound-evidence dt {
+  color: var(--ink-muted);
+  font-family: "DM Mono Local", monospace;
+  font-size: 0.54rem;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.sourcebound-evidence dd {
+  margin: 5px 0 0;
+  color: var(--ink);
+  font-size: 0.72rem;
+  font-weight: 720;
+  line-height: 1.35;
+}
+
+.sourcebound-frame {
+  display: block;
+  cursor: pointer;
+}
+
+.sourcebound-image {
+  width: 100%;
+  aspect-ratio: 3 / 2;
+  object-fit: cover;
+  object-position: top;
+  transition: transform 500ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.sourcebound-caption {
+  max-width: 64ch;
+  margin: 18px 0 0;
+  color: var(--ink-muted);
+  font-size: 0.72rem;
+  line-height: 1.65;
+}
+
+.sourcebound-proof {
+  grid-column: 1 / -1;
+  margin-top: clamp(4rem, 7vw, 6.5rem);
+}
+
+.sourcebound-proof-intro {
+  max-width: 660px;
+  margin-bottom: 28px;
+}
+
+.sourcebound-proof-intro h4 {
+  margin: 0;
+  font-size: clamp(2rem, 4vw, 3.6rem);
+  font-weight: 620;
+  letter-spacing: -0.055em;
+  line-height: 1.04;
+}
+
+.sourcebound-proof-intro p {
+  max-width: 56ch;
+  margin: 16px 0 0;
+  color: var(--ink-muted);
+  font-size: 0.86rem;
+  line-height: 1.65;
+}
+
+.sourcebound-video {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-panel);
+  background: #0f1111;
+  box-shadow: var(--shadow);
+}
+
+.sourcebound-proof-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+  margin-top: 18px;
+}
+
+.sourcebound-proof-grid figure {
+  margin: 0;
+}
+
+.sourcebound-proof-grid img {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-input);
+  object-fit: cover;
+}
+
+.sourcebound-proof-grid figcaption {
+  padding: 10px 2px 0;
+  color: var(--ink-muted);
+  font-size: 0.68rem;
+  line-height: 1.5;
 }
 
 .research {
@@ -1416,6 +1586,15 @@ img {
     background: var(--accent);
     color: var(--accent-ink);
   }
+
+  .sourcebound-frame:hover .sourcebound-image {
+    transform: scale(1.015);
+  }
+
+  .sourcebound-frame:hover .media-open {
+    background: var(--accent);
+    color: var(--accent-ink);
+  }
 }
 
 @media (max-width: 1080px) {
@@ -1561,6 +1740,10 @@ img {
     grid-template-columns: 1fr;
   }
 
+  .sourcebound-project {
+    grid-template-columns: 1fr;
+  }
+
   .project-controls,
   .about-statement {
     position: static;
@@ -1670,6 +1853,23 @@ img {
 
   .project-meta {
     grid-template-columns: 54px 1fr;
+  }
+
+  .sourcebound-actions {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .sourcebound-actions .button {
+    width: 100%;
+  }
+
+  .sourcebound-evidence > div {
+    padding: 12px 10px;
+  }
+
+  .sourcebound-proof-grid {
+    grid-template-columns: 1fr;
   }
 
   .project-tabs button {

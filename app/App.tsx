@@ -288,6 +288,104 @@ function ProjectMedia({ activeIndex }: { activeIndex: number }) {
   );
 }
 
+function SourceboundProject() {
+  return (
+    <article className="sourcebound-project" id="sourcebound" aria-labelledby="sourcebound-title">
+      <Reveal className="sourcebound-copy">
+        <p className="section-index">Project 02 / Research infrastructure</p>
+        <h3 id="sourcebound-title">Research that leaves a trail.</h3>
+        <p>
+          Sourcebound searches independent providers, preserves source-specific evidence,
+          and verifies claim support before it presents a cited report.
+        </p>
+
+        <div className="sourcebound-actions">
+          <a className="button button-primary" href={`${BASE}/sourcebound/`}>
+            Explore the trace <ArrowUpRight aria-hidden="true" size={17} />
+          </a>
+          <a
+            className="inline-link"
+            href="https://github.com/nithin-git7/sourcebound-research-agent"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            View the repository <ExternalArrow />
+          </a>
+        </div>
+
+        <dl className="sourcebound-evidence" aria-label="Verified release evidence">
+          <div><dt>Tests</dt><dd>56 passing</dd></div>
+          <div><dt>Benchmark</dt><dd>3 fixture cases</dd></div>
+          <div><dt>Providers</dt><dd>4 perspectives</dd></div>
+        </dl>
+      </Reveal>
+
+      <Reveal className="sourcebound-media" delay={0.1}>
+        <a className="browser-frame sourcebound-frame" href={`${BASE}/sourcebound/`} aria-label="Open the Sourcebound research trace viewer">
+          <div className="browser-bar" aria-hidden="true">
+            <div className="browser-dots"><span /><span /><span /></div>
+            <div className="browser-address">nithin-git7.github.io/Portfolio/sourcebound</div>
+            <span className="browser-secure">Trace</span>
+          </div>
+          <img
+            className="sourcebound-image"
+            src={`${BASE}/assets/sourcebound-trace.png`}
+            alt="Sourcebound evidence lab showing a six-stage, citation-grounded research trace"
+            width="1440"
+            height="2875"
+            loading="lazy"
+            decoding="async"
+          />
+          <div className="media-open"><span>Open case study</span><ExternalArrow /></div>
+        </a>
+        <p className="sourcebound-caption">
+          The public viewer exposes the plan, providers, evidence, claims, and verification result from a deterministic sample run.
+        </p>
+      </Reveal>
+
+      <Reveal className="sourcebound-proof" delay={0.12}>
+        <div className="sourcebound-proof-intro">
+          <h4>Watch the evidence trail.</h4>
+          <p>A computer-controlled walkthrough of the real interface, from bounded query planning to visible support gaps.</p>
+        </div>
+
+        <video
+          className="sourcebound-video"
+          controls
+          muted
+          loop
+          playsInline
+          preload="metadata"
+          poster={`${BASE}/assets/sourcebound-demo-frames/08-verification.png`}
+          aria-label="Automated walkthrough of the Sourcebound research trace"
+        >
+          <source src={`${BASE}/assets/sourcebound-walkthrough.webm`} type="video/webm" />
+          Your browser does not support the Sourcebound walkthrough video.
+        </video>
+
+        <div className="sourcebound-proof-grid" aria-label="Sourcebound proof-of-work screenshots">
+          <figure>
+            <img src={`${BASE}/assets/sourcebound-demo-frames/04-providers.png`} alt="Sourcebound provider health stage with four successful research providers" width="1536" height="864" loading="lazy" decoding="async" />
+            <figcaption>Provider health and independent perspectives</figcaption>
+          </figure>
+          <figure>
+            <img src={`${BASE}/assets/sourcebound-demo-frames/05-evidence.png`} alt="Sourcebound evidence stage with source-specific passages and provenance" width="1536" height="864" loading="lazy" decoding="async" />
+            <figcaption>Source-owned passages with offsets and provenance</figcaption>
+          </figure>
+          <figure>
+            <img src={`${BASE}/assets/sourcebound-demo-frames/06-claims.png`} alt="Sourcebound claims stage mapping conclusions to citation identifiers" width="1536" height="864" loading="lazy" decoding="async" />
+            <figcaption>Claims mapped to clickable citation sets</figcaption>
+          </figure>
+          <figure>
+            <img src={`${BASE}/assets/sourcebound-demo-frames/08-verification.png`} alt="Sourcebound verification stage exposing support coverage and partial claims" width="1536" height="864" loading="lazy" decoding="async" />
+            <figcaption>Final support report with partial coverage visible</figcaption>
+          </figure>
+        </div>
+      </Reveal>
+    </article>
+  );
+}
+
 function Work() {
   const [activeIndex, setActiveIndex] = useState(0);
 
@@ -297,10 +395,10 @@ function Work() {
         <Reveal className="section-heading work-heading">
           <div>
             <p className="section-index">01 / Selected work</p>
-            <h2 id="work-title">One product.<br />One clear job.</h2>
+            <h2 id="work-title">Two systems.<br />Built for decisions.</h2>
           </div>
           <div className="section-summary">
-            <p>ClearPath Germany turns a fragmented application process into a personal control room with official verification built into the flow.</p>
+            <p>ClearPath organizes a high-stakes application journey. Sourcebound makes multi-source AI research inspectable and citation-grounded.</p>
             <a className="inline-link" href="https://clearpath-gilt.vercel.app/" target="_blank" rel="noopener noreferrer">
               Open the live product <ExternalArrow />
             </a>
@@ -309,6 +407,10 @@ function Work() {
 
         <div className="project-layout">
           <Reveal className="project-controls" delay={0.05}>
+            <div className="project-heading">
+              <span>Project 01 / Student decision system</span>
+              <h3>ClearPath Germany</h3>
+            </div>
             <div className="project-meta">
               <span>Role</span><p>Product, interface, implementation</p>
               <span>Stack</span><p>Next.js, FastAPI, Python</p>
@@ -355,6 +457,8 @@ function Work() {
             </div>
           </Reveal>
         </div>
+
+        <SourceboundProject />
       </div>
     </section>
   );
