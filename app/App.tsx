@@ -296,7 +296,8 @@ function SourceboundProject() {
         <h3 id="sourcebound-title">Research that leaves a trail.</h3>
         <p>
           Sourcebound searches independent providers, preserves source-specific evidence,
-          and verifies claim support before it presents a cited report.
+          and verifies claim support before it presents a cited report. Version 0.2 adds
+          asynchronous jobs, run telemetry, optional semantic review, and live public retrieval.
         </p>
 
         <div className="sourcebound-actions">
@@ -314,9 +315,9 @@ function SourceboundProject() {
         </div>
 
         <dl className="sourcebound-evidence" aria-label="Verified release evidence">
-          <div><dt>Tests</dt><dd>56 passing</dd></div>
-          <div><dt>Benchmark</dt><dd>3 fixture cases</dd></div>
-          <div><dt>Providers</dt><dd>4 perspectives</dd></div>
+          <div><dt>Tests</dt><dd>77 passing</dd></div>
+          <div><dt>Benchmark</dt><dd>25 cases</dd></div>
+          <div><dt>Live demo</dt><dd>2 public providers</dd></div>
         </dl>
       </Reveal>
 
@@ -339,14 +340,15 @@ function SourceboundProject() {
           <div className="media-open"><span>Open case study</span><ExternalArrow /></div>
         </a>
         <p className="sourcebound-caption">
-          The public viewer exposes the plan, providers, evidence, claims, and verification result from a deterministic sample run.
+          Run a question against Wikipedia and OpenAlex in the browser, then inspect the
+          evidence trail. A deterministic sample remains available for reproducible review.
         </p>
       </Reveal>
 
       <Reveal className="sourcebound-proof" delay={0.12}>
         <div className="sourcebound-proof-intro">
           <h4>Watch the evidence trail.</h4>
-          <p>A computer-controlled walkthrough of the real interface, from bounded query planning to visible support gaps.</p>
+          <p>A computer-controlled walkthrough of the real interface, from bounded query planning to visible support gaps. The case study now also supports live public retrieval.</p>
         </div>
 
         <video
